@@ -2,7 +2,12 @@
 import { onMounted } from 'vue'
 import { supabase } from './supabase'
 
+// Set this to true when you want to enable Supabase visitor tracking
+const ENABLE_TRACKING = false;
+
 onMounted(async () => {
+  if (!ENABLE_TRACKING) return;
+
   try {
     // 1. Fetch IPv4 specifically
     const ipResponse = await fetch('https://api4.ipify.org?format=json')
