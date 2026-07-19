@@ -36,6 +36,13 @@ const projects = ref([
     tech: ['WordPress', 'PHP', 'JavaScript', 'CSS3'],
     link: 'https://ecarskigali.com/',
     category: 'WordPress'
+  },
+  {
+    name: 'Myshop1 Mobile App',
+    desc: 'A mobile client for e-commerce stores built using Java and Android SDK, featuring smooth checkout and product search.',
+    tech: ['Java', 'Android SDK', 'REST APIs', 'SQLite'],
+    link: 'https://github.com/jackeybharthi/Myshop1',
+    category: 'Mobile'
   }
 ])
 
