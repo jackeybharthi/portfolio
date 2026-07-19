@@ -7,6 +7,7 @@ const passwordInput = ref('')
 const errorMsg = ref('')
 const visitorData = ref([])
 const searchQuery = ref('')
+const deviceFilter = ref('All')
 const isLoading = ref(false)
 
 const checkPassword = () => {
@@ -39,17 +40,27 @@ const loadData = async () => {
 }
 
 const filteredVisitors = computed(() => {
-  if (!searchQuery.value) return visitorData.value
+  let result = visitorData.value
   
-  const query = searchQuery.value.toLowerCase()
-  return visitorData.value.filter(visitor => {
-    return (
-      (visitor.ip && visitor.ip.toLowerCase().includes(query)) ||
-      (visitor.city && visitor.city.toLowerCase().includes(query)) ||
-      (visitor.country && visitor.country.toLowerCase().includes(query)) ||
-      (visitor.device_type && visitor.device_type.toLowerCase().includes(query))
-    )
-  })
+  // 1. Apply Device Filter
+  if (deviceFilter.value !== 'All') {
+    result = result.filter(v => v.device_type && v.device_type.includes(deviceFilter.value))
+  }
+  
+  // 2. Apply Text Search
+  if (searchQuery.value) {
+    const query = searchQuery.value.toLowerCase()
+    result = result.filter(visitor => {
+      return (
+        (visitor.ip && visitor.ip.toLowerCase().includes(query)) ||
+        (visitor.city && visitor.city.toLowerCase().includes(query)) ||
+        (visitor.country && visitor.country.toLowerCase().includes(query)) ||
+        (visitor.device_type && visitor.device_type.toLowerCase().includes(query))
+      )
+    })
+  }
+  
+  return result
 })
 
 const formatDate = (isoString) => {
@@ -58,6 +69,53 @@ const formatDate = (isoString) => {
     month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
   }).format(date)
 }
+
+const last7DaysStats = computed(() => {
+  const stats = []
+  // Get last 7 days
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date()
+    d.setDate(d.getDate() - i)
+    const dateStr = d.toISOString().split('T')[0]
+    stats.push({
+      date: dateStr,
+      displayDate: new Intl.DateTimeFormat('en-US', { weekday: 'short' }).format(d),
+      count: 0
+    })
+  }
+  
+  // Count visitors per day
+  visitorData.value.forEach(v => {
+    if (!v.created_at) return
+    const vDate = v.created_at.split('T')[0]
+    const statObj = stats.find(s => s.date === vDate)
+    if (statObj) {
+      statObj.count++
+    }
+  })
+  
+  // Calculate heights relative to the max day
+  const max = Math.max(...stats.map(s => s.count), 5) // Minimum scale of 5
+  
+  return stats.map(s => ({
+    ...s,
+    height: `${Math.max((s.count / max) * 100, 5)}%` // minimum 5% height just to show a tiny bar
+  }))
+})
+
+// Quick Summary Stats
+const totalVisitors = computed(() => visitorData.value.length)
+
+const visitorsLast30Days = computed(() => {
+  const thirtyDaysAgo = new Date()
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+  return visitorData.value.filter(v => new Date(v.created_at) >= thirtyDaysAgo).length
+})
+
+const visitorsToday = computed(() => {
+  const todayStr = new Date().toISOString().split('T')[0]
+  return visitorData.value.filter(v => v.created_at && v.created_at.split('T')[0] === todayStr).length
+})
 </script>
 
 <template>
@@ -113,13 +171,55 @@ const formatDate = (isoString) => {
             <p class="role-desc">Live global session tracking</p>
           </div>
           
-          <div class="search-wrapper">
+          <div class="search-wrapper" style="display: flex; gap: 12px; align-items: center;">
+            <div class="filter-chips">
+              <button 
+                :class="['filter-chip', deviceFilter === 'All' ? 'active' : '']" 
+                @click="deviceFilter = 'All'">All</button>
+              <button 
+                :class="['filter-chip', deviceFilter === 'Desktop' ? 'active' : '']" 
+                @click="deviceFilter = 'Desktop'">Desktop</button>
+              <button 
+                :class="['filter-chip', deviceFilter === 'Mobile' ? 'active' : '']" 
+                @click="deviceFilter = 'Mobile'">Mobile</button>
+            </div>
             <input 
               type="text" 
               v-model="searchQuery" 
-              placeholder="Search IP, City, Device..." 
+              placeholder="Search IP, City..." 
               class="admin-input search-input"
+              style="width: 250px;"
             />
+          </div>
+        </div>
+
+        <!-- Quick Summary Stats (Ultra Compact) -->
+        <div class="summary-stats-row">
+          <div class="summary-chip">
+            <span class="chip-label">Today:</span>
+            <span class="chip-value">{{ visitorsToday }}</span>
+          </div>
+          <div class="summary-chip">
+            <span class="chip-label">Last 30 Days:</span>
+            <span class="chip-value">{{ visitorsLast30Days }}</span>
+          </div>
+          <div class="summary-chip">
+            <span class="chip-label">Total:</span>
+            <span class="chip-value">{{ totalVisitors }}</span>
+          </div>
+        </div>
+        
+        <!-- Visitor Graph Section -->
+        <div class="stat-card graph-card">
+          <h3 class="section-title" style="font-size: 18px; margin-bottom: 20px;">Last 7 Days Visitors</h3>
+          <div class="bar-chart">
+            <div class="bar-column" v-for="stat in last7DaysStats" :key="stat.date">
+              <span class="bar-count">{{ stat.count }}</span>
+              <div class="bar-track">
+                <div class="bar-fill" :style="{ height: stat.height }"></div>
+              </div>
+              <span class="bar-label">{{ stat.displayDate }}</span>
+            </div>
           </div>
         </div>
         
@@ -293,6 +393,130 @@ const formatDate = (isoString) => {
   margin-top: 14px;
   font-size: 14px;
   font-weight: 500;
+}
+
+/* Ultra Compact Summary Stats */
+.summary-stats-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.summary-chip {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 6px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chip-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.chip-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+/* Custom CSS Bar Chart */
+.graph-card {
+  margin-bottom: 20px;
+  background: var(--card-bg);
+  padding: 16px 20px;
+}
+
+/* Device Filter Chips */
+.filter-chips {
+  display: flex;
+  background: rgba(15, 23, 42, 0.5);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 4px;
+}
+
+.filter-chip {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.filter-chip:hover {
+  color: var(--text-primary);
+}
+
+.filter-chip.active {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 0 10px var(--accent-glow);
+}
+
+.bar-chart {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-around;
+  height: 100px;
+  padding-top: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.bar-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  width: 40px;
+}
+
+.bar-track {
+  width: 100%;
+  flex-grow: 1;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 6px 6px 0 0;
+  display: flex;
+  align-items: flex-end;
+  margin-bottom: 10px;
+  position: relative;
+  overflow: hidden;
+}
+
+.bar-fill {
+  width: 100%;
+  background: var(--gradient-primary);
+  border-radius: 6px 6px 0 0;
+  transition: height 1s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 -5px 15px var(--accent-glow);
+}
+
+.bar-column:hover .bar-fill {
+  filter: brightness(1.2);
+}
+
+.bar-count {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.bar-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 500;
+  text-transform: uppercase;
 }
 
 /* Dashboard State */

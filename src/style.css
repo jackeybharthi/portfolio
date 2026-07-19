@@ -49,16 +49,22 @@ body {
 }
 
 :root.light-theme {
-  --bg: #f0f9ff; /* Very light sky blue */
-  --card-bg: rgba(255, 255, 255, 0.85);
-  --border: rgba(2, 132, 199, 0.15);
+  --bg: #f8fafc; /* Very clean, almost white slate background */
+  --card-bg: rgba(255, 255, 255, 0.65); /* Highly transparent for premium frosted glass */
+  --border: rgba(255, 255, 255, 0.8); /* Solid white borders to pop out */
   --text-primary: #0f172a;
-  --text-secondary: #334155;
-  --accent: #0284c7;
-  --accent-glow: rgba(2, 132, 199, 0.15);
-  --gradient-primary: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
-  --shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05);
+  --text-secondary: #475569;
+  --accent: #0ea5e9;
+  --accent-glow: rgba(14, 165, 233, 0.25);
+  --gradient-primary: linear-gradient(135deg, #0284c7 0%, #3b82f6 100%);
+  --shadow: 0 20px 40px -10px rgba(14, 165, 233, 0.1);
 }
+
+/* Light Theme Orbs - Soft pastel colors so they look beautiful and not harsh */
+:root.light-theme .bg-orb-1 { background: radial-gradient(circle, #bae6fd 0%, rgba(186, 230, 253, 0) 70%); }
+:root.light-theme .bg-orb-2 { background: radial-gradient(circle, #e0e7ff 0%, rgba(224, 231, 255, 0) 70%); }
+:root.light-theme .bg-orb-3 { background: radial-gradient(circle, #ccfbf1 0%, rgba(204, 251, 241, 0) 70%); }
+
 
 :root.light-theme body {
   background-image: 

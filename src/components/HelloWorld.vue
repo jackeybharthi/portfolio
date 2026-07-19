@@ -3,25 +3,39 @@ import { ref, onMounted, onUnmounted, computed } from 'vue'
 
 const projects = ref([
   {
-    name: 'Laravel Enterprise Portal',
-    desc: 'A robust headless back-end portal and REST API built with Laravel, PHP, and MySQL, featuring multi-tenant auth and custom reporting.',
+    name: 'JobDekho',
+    desc: 'A full-featured job portal platform built with a robust Laravel backend. Designed for seamless job searching and recruitment management.',
     tech: ['Laravel', 'PHP', 'MySQL', 'REST APIs'],
-    link: 'https://github.com/jackeybharthi',
+    link: 'https://www.jobdekhofor.me/',
     category: 'Laravel'
   },
   {
-    name: 'WooCommerce & WordPress Custom Theme',
-    desc: 'A highly customized e-commerce WordPress theme with custom post types, Gutenberg blocks, and full WooCommerce integration.',
+    name: 'Perfume Worlds',
+    desc: 'An elegant e-commerce platform for premium fragrances, built with a high-performance Laravel backend to manage inventory and orders.',
+    tech: ['Laravel', 'PHP', 'JavaScript', 'CSS3'],
+    link: 'https://www.perfumeworlds.com/',
+    category: 'Laravel'
+  },
+  {
+    name: 'VMS Accounts CRM',
+    desc: 'A comprehensive custom CRM platform featuring multi-module support, multi-currency transactions, and complete management for customers, suppliers, orders, payments, credits, and advances.',
+    tech: ['Laravel', 'PHP', 'MySQL', 'Vue.js'],
+    link: 'https://vmsaccounts.com/login',
+    category: 'Laravel'
+  },
+  {
+    name: 'EcoRides Kigali',
+    desc: 'A professional and fully customized WordPress website designed for sustainable eco-friendly transportation services in Kigali.',
     tech: ['WordPress', 'PHP', 'JavaScript', 'CSS3'],
-    link: 'https://github.com/jackeybharthi',
+    link: 'https://ecorideskigali.com/',
     category: 'WordPress'
   },
   {
-    name: 'Myshop1 Mobile App',
-    desc: 'A mobile client for e-commerce stores built using Java and Android SDK, featuring smooth checkout and product search.',
-    tech: ['Java', 'Android SDK', 'REST APIs', 'SQLite'],
-    link: 'https://github.com/jackeybharthi/Myshop1',
-    category: 'Mobile'
+    name: 'eCars Kigali',
+    desc: 'A modern, high-performance WordPress platform for electric vehicle rentals and services in Rwanda, featuring custom booking integrations.',
+    tech: ['WordPress', 'PHP', 'JavaScript', 'CSS3'],
+    link: 'https://ecarskigali.com/',
+    category: 'WordPress'
   }
 ])
 
