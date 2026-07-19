@@ -46,15 +46,17 @@ const skills = ref([
     items: [
       { name: 'Laravel / PHP', level: 'Expert', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/laravel/laravel-original.svg' },
       { name: 'Node.js / Express', level: 'Advanced', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg' },
-      { name: 'MySQL / PostgreSQL', level: 'Expert', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mysql/mysql-original.svg' }
+      { name: 'MySQL / PostgreSQL', level: 'Expert', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mysql/mysql-original.svg' },
+      { name: 'Supabase', level: 'Advanced', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/supabase/supabase-original.svg' }
     ]
   },
   {
-    category: 'CMS, Mobile & Tools',
+    category: 'Cloud, Mobile & AI Tools',
     items: [
+      { name: 'AWS Cloud', level: 'Advanced', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/amazonwebservices/amazonwebservices-original-wordmark.svg' },
+      { name: 'n8n & AI Automation', level: 'Expert', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/bash/bash-original.svg' },
       { name: 'WordPress Development', level: 'Expert', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/wordpress/wordpress-plain.svg' },
-      { name: 'React Native / Java', level: 'Advanced', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg' },
-      { name: 'GitHub Actions / Git', level: 'Expert', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/git/git-original.svg' }
+      { name: 'React Native / Java', level: 'Advanced', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg' }
     ]
   }
 ])
@@ -143,7 +145,7 @@ const handleTerminalCommand = () => {
       terminalLines.value.push({ text: 'I am a Full-Stack Software Developer specializing in building high-performance web applications using Laravel, React, Vue, Next.js, and WordPress. Based in Ahmedabad.', type: 'response' })
       break
     case 'skills':
-      terminalLines.value.push({ text: '=== Tech Stack ===\n* Laravel & PHP\n* WordPress & WooCommerce\n* React, Next.js, Vue\n* Node.js & REST APIs\n* MySQL, PostgreSQL, Android Java', type: 'response' })
+      terminalLines.value.push({ text: '=== Tech Stack ===\n* Laravel & PHP\n* AWS, Supabase, n8n AI Automation\n* React, Next.js, Vue\n* Node.js & REST APIs\n* MySQL, PostgreSQL, Android Java', type: 'response' })
       break
     case 'contact':
       terminalLines.value.push({ text: 'Email: jackey.bharthi@gmail.com\nWhatsApp: +91 82000 04544\nLocation: Ahmedabad, Gujarat, India\nLinkedIn: linkedin.com/in/jackeybharthi', type: 'response' })
@@ -230,15 +232,10 @@ onMounted(() => {
     })
   }
 
-  // Restore theme preference
-  const savedTheme = localStorage.getItem('theme')
-  if (savedTheme === 'light') {
-    isDark.value = false
-    document.documentElement.classList.add('light-theme')
-  } else {
-    isDark.value = true
-    document.documentElement.classList.remove('light-theme')
-  }
+  // Always default to dark theme on load
+  isDark.value = true
+  document.documentElement.classList.remove('light-theme')
+  localStorage.setItem('theme', 'dark')
 
   // Scroll Reveal Observer
   const revealObserver = new IntersectionObserver((entries) => {
@@ -273,6 +270,21 @@ onUnmounted(() => {
     <div class="bg-orb bg-orb-1"></div>
     <div class="bg-orb bg-orb-2"></div>
     <div class="bg-orb bg-orb-3"></div>
+  </div>
+  
+  <div class="celestial-container" :style="{ transform: 'translate3d(' + (mouseX * -0.6) + 'px, ' + (mouseY * -0.6) + 'px, 0)' }">
+    <div class="celestial-moon" :class="{ 'visible': isDark }">
+      <div class="crater c1"></div>
+      <div class="crater c2"></div>
+      <div class="crater c3"></div>
+    </div>
+    <div class="celestial-sun" :class="{ 'visible': !isDark }">
+      <div class="sun-core"></div>
+      <div class="sun-ray r1"></div>
+      <div class="sun-ray r2"></div>
+      <div class="sun-ray r3"></div>
+      <div class="sun-ray r4"></div>
+    </div>
   </div>
   <div class="bg-particles-container">
     <div 
@@ -316,9 +328,14 @@ onUnmounted(() => {
       <a href="#projects" :class="{ active: activeSection === 'projects' }">Projects</a>
       <a href="#skills" :class="{ active: activeSection === 'skills' }">Skills</a>
       <a href="#contact" :class="{ active: activeSection === 'contact' }">Contact</a>
-      <button @click="toggleTheme" class="theme-toggle" aria-label="Toggle theme" style="background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 16px; margin-left: 12px; transition: color 0.3s; display: inline-flex; align-items: center;">
-        <i :class="isDark ? 'bi bi-sun-fill' : 'bi bi-moon-fill'"></i>
-      </button>
+      
+      <div class="theme-switch" @click="toggleTheme" role="button" aria-label="Toggle Dark Mode">
+        <div class="switch-track" :class="{ 'is-light': !isDark }">
+          <div class="switch-thumb"></div>
+          <i class="bi bi-moon-stars-fill icon-moon"></i>
+          <i class="bi bi-sun-fill icon-sun"></i>
+        </div>
+      </div>
     </nav>
   </header>
 
@@ -334,7 +351,7 @@ onUnmounted(() => {
           <span style="display: inline-block; min-height: 48px; background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">{{ typedText }}<span class="typed-cursor" style="color: var(--accent); margin-left: 4px; font-weight: 300;">|</span></span>
         </h1>
         <p class="hero-desc">
-          I am a Full-Stack Developer at Skywave Info Solutions specializing in Laravel, WordPress, React, Next.js, and Node.js. 
+          I am a Full-Stack Developer at <a href="https://www.skywaveinfosolutions.com/" target="_blank" style="color: var(--accent); text-decoration: none;">Skywave Info Solutions</a> specializing in Laravel, WordPress, React, Next.js, and Node.js. 
           Focused on crafting premium user experiences that are fast, modern, and highly scalable.
         </p>
         <div class="cta-group">
@@ -351,26 +368,28 @@ onUnmounted(() => {
     <div class="tech-marquee-container">
       <div class="tech-marquee-wrapper">
         <div class="tech-marquee-track">
+          <span class="marquee-item"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/amazonwebservices/amazonwebservices-original-wordmark.svg" alt="" /> AWS</span>
+          <span class="marquee-item"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/supabase/supabase-original.svg" alt="" /> Supabase</span>
+          <span class="marquee-item"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/bash/bash-original.svg" alt="" /> n8n AI</span>
           <span class="marquee-item"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/laravel/laravel-original.svg" alt="" /> Laravel</span>
           <span class="marquee-item"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/wordpress/wordpress-plain.svg" alt="" /> WordPress</span>
           <span class="marquee-item"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg" alt="" /> React</span>
           <span class="marquee-item"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nextjs/nextjs-original.svg" alt="" /> Next.js</span>
           <span class="marquee-item"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vuejs/vuejs-original.svg" alt="" /> Vue.js</span>
           <span class="marquee-item"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg" alt="" /> Node.js</span>
-          <span class="marquee-item"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/php/php-original.svg" alt="" /> PHP</span>
           <span class="marquee-item"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mysql/mysql-original.svg" alt="" /> MySQL</span>
-          <span class="marquee-item"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/git/git-original.svg" alt="" /> Git / GitHub</span>
         </div>
         <div class="tech-marquee-track">
+          <span class="marquee-item"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/amazonwebservices/amazonwebservices-original-wordmark.svg" alt="" /> AWS</span>
+          <span class="marquee-item"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/supabase/supabase-original.svg" alt="" /> Supabase</span>
+          <span class="marquee-item"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/bash/bash-original.svg" alt="" /> n8n AI</span>
           <span class="marquee-item"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/laravel/laravel-original.svg" alt="" /> Laravel</span>
           <span class="marquee-item"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/wordpress/wordpress-plain.svg" alt="" /> WordPress</span>
           <span class="marquee-item"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg" alt="" /> React</span>
           <span class="marquee-item"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nextjs/nextjs-original.svg" alt="" /> Next.js</span>
           <span class="marquee-item"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vuejs/vuejs-original.svg" alt="" /> Vue.js</span>
           <span class="marquee-item"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg" alt="" /> Node.js</span>
-          <span class="marquee-item"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/php/php-original.svg" alt="" /> PHP</span>
           <span class="marquee-item"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mysql/mysql-original.svg" alt="" /> MySQL</span>
-          <span class="marquee-item"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/git/git-original.svg" alt="" /> Git / GitHub</span>
         </div>
       </div>
     </div>
@@ -381,7 +400,7 @@ onUnmounted(() => {
         <div class="about-left" style="display: flex; flex-direction: column; gap: 24px;">
           <div class="about-text">
             <p>
-              Hello! I'm Jackey, a passionate full-stack developer based in Ahmedabad, Gujarat. I specialize in building robust web applications and portals using <strong>Laravel / PHP</strong> and <strong>Node.js</strong> on the backend, and <strong>React, Next.js, and Vue.js</strong> on the frontend, alongside expert custom <strong>WordPress</strong> design and development. My work at Skywave Info Solutions revolves around developing performant client portals, custom WooCommerce themes, APIs, and cross-platform apps.
+              Hello! I'm Jackey, a passionate full-stack developer based in Ahmedabad, Gujarat. I specialize in building robust web applications and portals using <strong>Laravel / PHP</strong> and <strong>Node.js</strong> on the backend, and <strong>React, Next.js, and Vue.js</strong> on the frontend, alongside expert custom <strong>WordPress</strong> design and development. My work at <a href="https://www.skywaveinfosolutions.com/" target="_blank" style="color: var(--accent); text-decoration: none;">Skywave Info Solutions</a> revolves around developing performant client portals, custom WooCommerce themes, APIs, and cross-platform apps.
             </p>
             <p style="margin-top: 16px;">
               I enjoy bridging the gap between design and development — translating complex designs into clean, accessible, and responsive code. I'm always looking to learn new technologies and improve my engineering skills.
@@ -418,8 +437,8 @@ onUnmounted(() => {
     <span class="keyword">public function</span> <span class="function-name">getSkills</span>() {
         <span class="keyword">return</span> [
             <span class="string">'frontend'</span> => [<span class="string">'React'</span>, <span class="string">'Vue.js'</span>, <span class="string">'Next.js'</span>],
-            <span class="keyword">'backend'</span>  => [<span class="string">'Laravel'</span>, <span class="string">'Node.js'</span>, <span class="string">'PHP'</span>],
-            <span class="keyword">'cms'</span>      => [<span class="string">'WordPress'</span>, <span class="string">'WooCommerce'</span>],
+            <span class="keyword">'backend'</span>  => [<span class="string">'Laravel'</span>, <span class="string">'Node.js'</span>, <span class="string">'Supabase'</span>],
+            <span class="keyword">'cloud_ai'</span> => [<span class="string">'AWS'</span>, <span class="string">'n8n Automation'</span>],
             <span class="string">'database'</span> => [<span class="string">'MySQL'</span>, <span class="string">'PostgreSQL'</span>]
         ];
     }
@@ -437,7 +456,7 @@ onUnmounted(() => {
           <div class="timeline-header">
             <div>
               <h3 class="role-title">Full-Stack Developer</h3>
-              <span class="company-name">Skywave Info Solutions Pvt. Ltd.</span>
+              <span class="company-name"><a href="https://www.skywaveinfosolutions.com/" target="_blank" style="color: inherit; text-decoration: none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Skywave Info Solutions Pvt. Ltd.</a></span>
             </div>
             <span class="role-duration">2022 - Present</span>
           </div>
@@ -553,7 +572,7 @@ onUnmounted(() => {
             </div>
             <form @submit.prevent="handleTerminalCommand" class="terminal-input-line">
               <span class="terminal-prompt">visitor@jackeybharthi:~$</span>
-              <input type="text" v-model="terminalInput" class="terminal-input" placeholder="Type a command..." autofocus />
+              <input type="text" v-model="terminalInput" class="terminal-input" placeholder="Type a command..." />
             </form>
           </div>
         </div>

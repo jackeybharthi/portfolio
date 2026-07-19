@@ -1,35 +1,62 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+@property --bg { syntax: '<color>'; inherits: true; initial-value: #020617; }
+@property --card-bg { syntax: '<color>'; inherits: true; initial-value: rgba(15, 23, 42, 0.7); }
+@property --border { syntax: '<color>'; inherits: true; initial-value: rgba(56, 189, 248, 0.15); }
+@property --text-primary { syntax: '<color>'; inherits: true; initial-value: #f8fafc; }
+@property --text-secondary { syntax: '<color>'; inherits: true; initial-value: #94a3b8; }
+@property --accent { syntax: '<color>'; inherits: true; initial-value: #38bdf8; }
+@property --accent-glow { syntax: '<color>'; inherits: true; initial-value: rgba(56, 189, 248, 0.2); }
+
 :root {
-  --bg: #09090b;
-  --card-bg: rgba(20, 20, 25, 0.6);
-  --border: rgba(255, 255, 255, 0.08);
-  --text-primary: #f4f4f5;
-  --text-secondary: #a1a1aa;
-  --accent: #a855f7;
-  --accent-glow: rgba(168, 85, 247, 0.15);
+  --bg: #020617; /* Deep night sky blue */
+  --card-bg: rgba(15, 23, 42, 0.7);
+  --border: rgba(56, 189, 248, 0.15); /* Sky blue border */
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --accent: #38bdf8; /* Bright sky blue */
+  --accent-glow: rgba(56, 189, 248, 0.2);
   --success: #10b981;
   --font-heading: 'Space Grotesk', sans-serif;
   --font-body: 'Plus Jakarta Sans', sans-serif;
-  --gradient-primary: linear-gradient(135deg, #a855f7 0%, #6366f1 100%);
+  --gradient-primary: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%); /* Sky gradient */
   --shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.7);
   
   font-family: var(--font-body);
   color: var(--text-primary);
-  background-color: var(--bg);
   scroll-behavior: smooth;
   overflow-x: hidden;
+  
+  /* Smoothly transition ALL theme variables everywhere */
+  transition: --bg 1.5s cubic-bezier(0.4, 0, 0.2, 1), 
+              --card-bg 1.5s cubic-bezier(0.4, 0, 0.2, 1), 
+              --border 1.5s cubic-bezier(0.4, 0, 0.2, 1), 
+              --text-primary 1.5s cubic-bezier(0.4, 0, 0.2, 1), 
+              --text-secondary 1.5s cubic-bezier(0.4, 0, 0.2, 1),
+              --accent 1.5s cubic-bezier(0.4, 0, 0.2, 1),
+              --accent-glow 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text-primary);
+  margin: 0;
+  min-height: 100vh;
 }
 
 :root.light-theme {
-  --bg: #f8fafc;
-  --card-bg: rgba(255, 255, 255, 0.8);
-  --border: rgba(15, 23, 42, 0.08);
+  --bg: #f0f9ff; /* Very light sky blue */
+  --card-bg: rgba(255, 255, 255, 0.85);
+  --border: rgba(2, 132, 199, 0.15);
   --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --accent: #7c3aed;
-  --accent-glow: rgba(124, 58, 237, 0.1);
-  --gradient-primary: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
+  --text-secondary: #334155;
+  --accent: #0284c7;
+  --accent-glow: rgba(2, 132, 199, 0.15);
+  --gradient-primary: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
   --shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05);
 }
 
@@ -73,7 +100,7 @@
 .bg-orb-1 {
   width: 500px;
   height: 500px;
-  background: radial-gradient(circle, #a855f7 0%, rgba(168, 85, 247, 0) 70%);
+  background: radial-gradient(circle, #38bdf8 0%, rgba(56, 189, 248, 0) 70%);
   top: -10%;
   left: -10%;
   animation: float-orb-1 25s infinite alternate ease-in-out;
@@ -82,7 +109,7 @@
 .bg-orb-2 {
   width: 600px;
   height: 600px;
-  background: radial-gradient(circle, #6366f1 0%, rgba(99, 102, 241, 0) 70%);
+  background: radial-gradient(circle, #2563eb 0%, rgba(37, 99, 235, 0) 70%);
   bottom: -15%;
   right: -10%;
   animation: float-orb-2 30s infinite alternate ease-in-out;
@@ -91,37 +118,113 @@
 .bg-orb-3 {
   width: 400px;
   height: 400px;
-  background: radial-gradient(circle, #ec4899 0%, rgba(236, 72, 153, 0) 70%);
+  background: radial-gradient(circle, #06b6d4 0%, rgba(6, 182, 212, 0) 70%);
   top: 35%;
   left: 25%;
   animation: float-orb-3 20s infinite alternate ease-in-out;
 }
 
+/* Celestial Bodies */
+.celestial-container {
+  position: fixed;
+  top: 10%;
+  right: 15%;
+  width: 200px;
+  height: 200px;
+  z-index: -1;
+  pointer-events: none;
+  transition: transform 0.1s ease-out;
+}
+
+.celestial-moon {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  opacity: 0;
+  transition: all 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+  /* Hidden state (Light mode) - Moon exits to the right */
+  left: 150vw;
+  transform: scale(0.5) translateY(200px);
+}
+
+.celestial-sun {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  opacity: 0;
+  transition: all 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+  /* Hidden state (Dark mode) - Sun waits on the left */
+  left: -150vw;
+  transform: scale(0.5) translateY(200px);
+}
+
+.celestial-moon.visible {
+  opacity: 0.9;
+  left: 0;
+  transform: scale(1) translateY(0);
+}
+
+.celestial-sun.visible {
+  opacity: 1;
+  left: 0;
+  transform: scale(1.2) translateY(0);
+}
+
+/* Hyper-Realistic Half Moon (Pure CSS) */
+.celestial-moon {
+  background-color: transparent;
+  background-image: none;
+  /* Inset shadow creates the perfect crescent/half moon shape */
+  box-shadow: inset 30px -15px 0 0 #fefcd7;
+  /* Filter applies a glow exactly to the crescent shape */
+  filter: drop-shadow(0 0 30px rgba(254, 252, 215, 0.5));
+  mix-blend-mode: normal;
+  animation: celestial-float 20s infinite alternate ease-in-out;
+}
+
+/* Hide old fake craters */
+.crater { display: none; }
+
+/* Hyper-Realistic Sun */
+.celestial-sun {
+  background: radial-gradient(circle at center, #ffffff 0%, #fff7cc 15%, #fde047 35%, #ea580c 65%, transparent 100%);
+  filter: drop-shadow(0 0 60px #ea580c) drop-shadow(0 0 120px #fde047);
+  animation: celestial-pulse 4s infinite alternate ease-in-out;
+}
+
+/* Hide old fake rays */
+.sun-core, .sun-ray { display: none; }
+
+@keyframes celestial-float {
+  0% { transform: translateY(0px) rotate(-5deg); }
+  100% { transform: translateY(-30px) rotate(5deg); }
+}
+
+@keyframes celestial-pulse {
+  0% { transform: scale(1.1); filter: drop-shadow(0 0 50px #ea580c) drop-shadow(0 0 100px #fde047); }
+  100% { transform: scale(1.25); filter: drop-shadow(0 0 80px #ea580c) drop-shadow(0 0 160px #fde047); }
+}
+
 @keyframes float-orb-1 {
-  0% {
-    transform: translate(0, 0) scale(1);
-  }
-  100% {
-    transform: translate(120px, 80px) scale(1.15);
-  }
+  0% { transform: translate(0, 0) scale(1) rotate(0deg); filter: hue-rotate(0deg); }
+  50% { transform: translate(200px, 150px) scale(1.5) rotate(180deg); filter: hue-rotate(180deg); }
+  100% { transform: translate(-100px, -50px) scale(0.8) rotate(360deg); filter: hue-rotate(360deg); }
 }
 
 @keyframes float-orb-2 {
-  0% {
-    transform: translate(0, 0) scale(1);
-  }
-  100% {
-    transform: translate(-100px, -120px) scale(0.9);
-  }
+  0% { transform: translate(0, 0) scale(1) rotate(0deg); filter: hue-rotate(0deg); }
+  50% { transform: translate(-250px, -200px) scale(1.4) rotate(-180deg); filter: hue-rotate(180deg); }
+  100% { transform: translate(150px, 100px) scale(0.9) rotate(-360deg); filter: hue-rotate(360deg); }
 }
 
 @keyframes float-orb-3 {
-  0% {
-    transform: translate(0, 0) scale(1) rotate(0deg);
-  }
-  100% {
-    transform: translate(-60px, 90px) scale(1.25) rotate(180deg);
-  }
+  0% { transform: translate(0, 0) scale(1) rotate(0deg); filter: hue-rotate(0deg); }
+  50% { transform: translate(150px, 250px) scale(1.6) rotate(180deg); filter: hue-rotate(180deg); }
+  100% { transform: translate(-150px, -200px) scale(0.7) rotate(360deg); filter: hue-rotate(360deg); }
 }
 
 /* Technical Background Grid Lines */
@@ -173,7 +276,7 @@
 .tech-marquee-wrapper {
   display: flex;
   width: max-content;
-  animation: marquee 30s linear infinite;
+  animation: marquee 10s linear infinite; /* Way faster */
 }
 
 .tech-marquee-track {
@@ -367,6 +470,69 @@ nav a:hover::after, nav a.active::after {
   left: 0;
 }
 
+/* --- Theme Toggle Switch --- */
+.theme-switch {
+  margin-left: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.switch-track {
+  position: relative;
+  width: 56px;
+  height: 28px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 30px;
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 6px;
+  transition: all 0.4s ease;
+  overflow: hidden;
+}
+
+.switch-track.is-light {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.switch-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  background: var(--accent);
+  border-radius: 50%;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 1;
+  box-shadow: 0 0 10px var(--accent-glow);
+}
+
+.switch-track.is-light .switch-thumb {
+  transform: translateX(28px);
+  background: #f59e0b;
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.3);
+}
+
+.icon-moon, .icon-sun {
+  font-size: 12px;
+  z-index: 0;
+  transition: opacity 0.3s ease;
+}
+
+.icon-moon {
+  color: #fff;
+}
+
+.icon-sun {
+  color: #f59e0b;
+}
+
+.switch-track.is-light .icon-moon { opacity: 0.3; }
+.switch-track:not(.is-light) .icon-sun { opacity: 0.3; }
+
 /* Hero Section */
 .hero-section {
   padding: 100px 0 80px;
@@ -381,6 +547,7 @@ nav a:hover::after, nav a.active::after {
   justify-content: center;
   align-items: center;
   position: relative;
+  animation: continuous-float 6s ease-in-out infinite;
 }
 
 .hero-orb {
@@ -434,6 +601,13 @@ nav a:hover::after, nav a.active::after {
   background: var(--success);
   border-radius: 50%;
   box-shadow: 0 0 8px var(--success);
+  animation: pulse-dot 2s infinite;
+}
+
+@keyframes pulse-dot {
+  0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+  70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
 }
 
 .hero-title {
@@ -443,6 +617,12 @@ nav a:hover::after, nav a.active::after {
   line-height: 1.1;
   letter-spacing: -2px;
   margin: 0 0 24px 0;
+  animation: rgb-text-pulse 2s infinite alternate, slide-up-fade 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes rgb-text-pulse {
+  0% { text-shadow: 0 0 10px rgba(168, 85, 247, 0.5), 4px 4px 0px rgba(0,255,255,0.3), -4px -4px 0px rgba(255,0,255,0.3); }
+  100% { text-shadow: 0 0 30px rgba(168, 85, 247, 0.9), -4px -4px 0px rgba(0,255,255,0.6), 4px 4px 0px rgba(255,0,255,0.6); }
 }
 
 .hero-title span {
@@ -528,6 +708,13 @@ nav a:hover::after, nav a.active::after {
   padding: 16px;
   text-align: center;
   backdrop-filter: blur(12px);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.stat-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  border-color: var(--accent);
+  box-shadow: 0 15px 30px rgba(168, 85, 247, 0.15);
 }
 
 .stat-num {
@@ -833,6 +1020,12 @@ section {
   height: 100%;
   box-sizing: border-box;
   overflow: hidden;
+  animation: float-card 4s infinite ease-in-out alternate;
+}
+
+@keyframes float-card {
+  0% { transform: translateY(0); box-shadow: 0 5px 15px rgba(168, 85, 247, 0.1); }
+  100% { transform: translateY(-10px); box-shadow: 0 15px 30px rgba(168, 85, 247, 0.3); }
 }
 
 .project-card::before {
@@ -928,6 +1121,13 @@ section {
   padding: 24px;
   backdrop-filter: blur(12px);
   text-align: left;
+  transition: all 0.4s ease;
+}
+
+.skills-category:hover {
+  transform: translateY(-5px);
+  border-color: rgba(168, 85, 247, 0.5);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
 }
 
 .skills-category h3 {
@@ -1106,6 +1306,9 @@ footer {
     grid-template-columns: 1fr;
     gap: 24px;
   }
+  .about-container > * {
+    min-width: 0;
+  }
   .about-text {
     font-size: 14px;
     line-height: 1.6;
@@ -1117,6 +1320,22 @@ footer {
   }
   .about-stats-grid {
     grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .stat-card {
+    padding: 12px 20px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    text-align: left;
+  }
+  .stat-num {
+    font-size: 24px;
+    margin-bottom: 0;
+  }
+  .stat-label {
+    font-size: 13px;
   }
   .experience-timeline {
     padding-left: 20px;
@@ -1139,4 +1358,106 @@ footer {
 @keyframes spin-animation {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+/* --- NEW MICRO-ANIMATIONS --- */
+@keyframes continuous-float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-15px); }
+  100% { transform: translateY(0px); }
+}
+
+@keyframes slide-up-fade {
+  0% { opacity: 0; transform: translateY(30px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.hero-title, .hero-desc, .cta-group, .badge {
+  animation: slide-up-fade 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 0;
+}
+
+.badge { animation-delay: 0.1s; }
+.hero-title { animation-delay: 0.25s; }
+.hero-desc { animation-delay: 0.4s; }
+.cta-group { animation-delay: 0.55s; }
+
+.timeline-item {
+  transition: transform 0.3s ease;
+}
+
+.timeline-item:hover {
+  transform: translateX(8px);
+}
+
+.timeline-item:hover .timeline-dot {
+  box-shadow: 0 0 15px var(--accent), 0 0 30px rgba(168, 85, 247, 0.4);
+  transform: scale(1.2);
+  transition: all 0.3s ease;
+}
+
+.timeline-dot {
+  transition: all 0.3s ease;
+}
+
+/* --- EVEN MORE ANIMATIONS --- */
+
+.project-card {
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease, border-color 0.4s ease;
+}
+
+.project-card:hover {
+  transform: perspective(1000px) rotateX(10deg) rotateY(10deg) translateY(-20px) scale(1.05) !important;
+  box-shadow: -20px 40px 60px rgba(168, 85, 247, 0.5) !important;
+  border-color: #fff;
+}
+
+.tech-tag {
+  transition: all 0.3s ease;
+}
+
+.tech-tag:hover {
+  transform: translateY(-2px) scale(1.05);
+  background: var(--accent) !important;
+  color: #fff !important;
+  box-shadow: 0 4px 10px rgba(168, 85, 247, 0.4);
+}
+
+.mock-editor {
+  transition: all 0.4s ease;
+}
+
+.mock-editor:hover {
+  box-shadow: 0 0 40px rgba(168, 85, 247, 0.15);
+  transform: translateY(-5px);
+  border-color: rgba(168, 85, 247, 0.4);
+}
+
+.btn {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.btn:hover {
+  transform: translateY(-8px) scale(1.1) rotate(-2deg) !important;
+  box-shadow: 0 10px 30px rgba(168, 85, 247, 0.6);
+}
+
+.btn-primary::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  transform: skewX(-20deg);
+  animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+  0% { left: -100%; }
+  20% { left: 200%; }
+  100% { left: 200%; }
 }
