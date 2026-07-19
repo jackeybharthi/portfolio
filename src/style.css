@@ -1461,3 +1461,10 @@ footer {
   20% { left: 200%; }
   100% { left: 200%; }
 }
+
+/* Mobile Adjustments */
+@media (max-width: 768px) {
+  .celestial-container {
+    display: none !important;
+  }
+}
