@@ -63,16 +63,38 @@ const name = ref('')
 const email = ref('')
 const message = ref('')
 const formSubmitted = ref(false)
+const submitting = ref(false)
+
+const getTechTagStyle = (tech) => {
+  const colors = {
+    'laravel': { color: '#ef4444', bg: 'rgba(239, 68, 68, 0.15)' },
+    'php': { color: '#6366f1', bg: 'rgba(99, 102, 241, 0.15)' },
+    'mysql': { color: '#0ea5e9', bg: 'rgba(14, 165, 233, 0.15)' },
+    'wordpress': { color: '#38bdf8', bg: 'rgba(56, 189, 248, 0.15)' },
+    'javascript': { color: '#eab308', bg: 'rgba(234, 179, 8, 0.15)' },
+    'css3': { color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.15)' },
+    'java': { color: '#f97316', bg: 'rgba(249, 115, 22, 0.15)' },
+    'android sdk': { color: '#22c55e', bg: 'rgba(34, 197, 94, 0.15)' },
+    'sqlite': { color: '#06b6d4', bg: 'rgba(6, 182, 212, 0.15)' },
+    'rest apis': { color: '#10b981', bg: 'rgba(16, 185, 129, 0.15)' }
+  }
+  const key = tech.toLowerCase()
+  return colors[key] || { color: 'var(--accent)', bg: 'var(--accent-glow)' }
+}
 
 const handleSend = () => {
   if (name.value && email.value && message.value) {
-    formSubmitted.value = true
-    name.value = ''
-    email.value = ''
-    message.value = ''
+    submitting.value = true
     setTimeout(() => {
-      formSubmitted.value = false
-    }, 5000)
+      submitting.value = false
+      formSubmitted.value = true
+      name.value = ''
+      email.value = ''
+      message.value = ''
+      setTimeout(() => {
+        formSubmitted.value = false
+      }, 5000)
+    }, 1200)
   }
 }
 const mouseX = ref(0)
@@ -140,8 +162,60 @@ const handleTerminalCommand = () => {
   }, 50)
 }
 
+const activeSection = ref('about')
+const typedText = ref('')
+const words = ['full-stack web applications', 'custom Laravel backends', 'bespoke WordPress themes', 'responsive user experiences']
+let wordIdx = 0
+let charIdx = 0
+let isDeleting = false
+
+const typeEffect = () => {
+  const currentWord = words[wordIdx]
+  if (isDeleting) {
+    typedText.value = currentWord.substring(0, charIdx - 1)
+    charIdx--
+  } else {
+    typedText.value = currentWord.substring(0, charIdx + 1)
+    charIdx++
+  }
+  
+  let speed = isDeleting ? 40 : 80
+  
+  if (!isDeleting && charIdx === currentWord.length) {
+    isDeleting = true
+    speed = 1500
+  } else if (isDeleting && charIdx === 0) {
+    isDeleting = false
+    wordIdx = (wordIdx + 1) % words.length
+    speed = 400
+  }
+  
+  setTimeout(typeEffect, speed)
+}
+
+const handleScroll = () => {
+  const sections = ['about', 'experience', 'projects', 'skills', 'contact']
+  const scrollPosition = window.scrollY + 120
+  
+  for (const sec of sections) {
+    const el = document.getElementById(sec)
+    if (el) {
+      const top = el.offsetTop
+      const height = el.offsetHeight
+      if (scrollPosition >= top && scrollPosition < top + height) {
+        activeSection.value = sec
+        break
+      }
+    }
+  }
+}
+
 onMounted(() => {
   window.addEventListener('mousemove', handleMouseMove)
+  window.addEventListener('scroll', handleScroll)
+  
+  // Launch typing effect
+  typeEffect()
   
   // Initialize particles
   for (let i = 0; i < 20; i++) {
@@ -183,6 +257,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   window.removeEventListener('mousemove', handleMouseMove)
+  window.removeEventListener('scroll', handleScroll)
 })
 </script>
 
@@ -236,11 +311,11 @@ onUnmounted(() => {
       <span>Jackey Bharthi</span>
     </a>
     <nav>
-      <a href="#about">About</a>
-      <a href="#experience">Experience</a>
-      <a href="#projects">Projects</a>
-      <a href="#skills">Skills</a>
-      <a href="#contact">Contact</a>
+      <a href="#about" :class="{ active: activeSection === 'about' }">About</a>
+      <a href="#experience" :class="{ active: activeSection === 'experience' }">Experience</a>
+      <a href="#projects" :class="{ active: activeSection === 'projects' }">Projects</a>
+      <a href="#skills" :class="{ active: activeSection === 'skills' }">Skills</a>
+      <a href="#contact" :class="{ active: activeSection === 'contact' }">Contact</a>
       <button @click="toggleTheme" class="theme-toggle" aria-label="Toggle theme" style="background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 16px; margin-left: 12px; transition: color 0.3s; display: inline-flex; align-items: center;">
         <i :class="isDark ? 'bi bi-sun-fill' : 'bi bi-moon-fill'"></i>
       </button>
@@ -256,7 +331,7 @@ onUnmounted(() => {
         </div>
         <h1 class="hero-title">
           Building high-performance,<br>
-          <span>full-stack web applications</span>
+          <span style="display: inline-block; min-height: 48px; background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">{{ typedText }}<span class="typed-cursor" style="color: var(--accent); margin-left: 4px; font-weight: 300;">|</span></span>
         </h1>
         <p class="hero-desc">
           I am a Full-Stack Developer at Skywave Info Solutions specializing in Laravel, WordPress, React, Next.js, and Node.js. 
@@ -312,7 +387,7 @@ onUnmounted(() => {
               I enjoy bridging the gap between design and development — translating complex designs into clean, accessible, and responsive code. I'm always looking to learn new technologies and improve my engineering skills.
             </p>
           </div>
-          <div class="about-stats" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+          <div class="about-stats-grid">
             <div class="stat-card" style="padding: 12px;">
               <span class="stat-num">4+</span>
               <span class="stat-label">Years Experience</span>
@@ -403,7 +478,7 @@ onUnmounted(() => {
       <div class="projects-grid">
         <div v-for="project in filteredProjects" :key="project.name" class="project-card">
           <div class="project-tech">
-            <span v-for="tech in project.tech" :key="tech" class="tech-tag">{{ tech }}</span>
+            <span v-for="tech in project.tech" :key="tech" class="tech-tag" :style="{ color: getTechTagStyle(tech).color, background: getTechTagStyle(tech).bg }">{{ tech }}</span>
           </div>
           <h3 class="project-name">{{ project.name }}</h3>
           <p class="project-desc">{{ project.desc }}</p>
@@ -500,7 +575,11 @@ onUnmounted(() => {
             <label for="message">Message</label>
             <textarea id="message" v-model="message" class="form-textarea" required placeholder="What would you like to discuss?"></textarea>
           </div>
-          <button type="submit" class="btn btn-primary" style="margin-top: 8px;">Send Message</button>
+          <button type="submit" class="btn btn-primary" style="margin-top: 8px; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
+            <span v-if="submitting">Sending Message...</span>
+            <i v-if="submitting" class="bi bi-arrow-repeat spin" style="font-size: 16px;"></i>
+            <span v-else>Send Message</span>
+          </button>
         </form>
       </div>
     </section>
