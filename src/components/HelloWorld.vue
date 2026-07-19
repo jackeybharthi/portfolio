@@ -344,7 +344,7 @@ onUnmounted(() => {
       </div>
       <div class="hero-image-wrapper">
         <div class="hero-orb" :style="{ transform: 'translate3d(' + (mouseX * -0.8) + 'px, ' + (mouseY * -0.8) + 'px, 0)' }"></div>
-        <img src="https://jackeybharthi.wordpress.com/wp-content/uploads/2025/02/img_20231006_184007_619-edited-1.jpg" alt="Jackey Bharthi" class="profile-photo" :style="{ transform: 'translate3d(' + (mouseX * 0.4) + 'px, ' + (mouseY * 0.4) + 'px, 0)' }" />
+        <img src="/profile.jpg" alt="Jackey Bharthi" class="profile-photo" :style="{ transform: 'translate3d(' + (mouseX * 0.4) + 'px, ' + (mouseY * 0.4) + 'px, 0)' }" />
       </div>
     </section>
 
@@ -381,7 +381,7 @@ onUnmounted(() => {
         <div class="about-left" style="display: flex; flex-direction: column; gap: 24px;">
           <div class="about-text">
             <p>
-              Hello! I'm Jackey, a passionate full-stack developer based in Ahmedabad, Gujarat. I specialize in building robust web applications and portals using **Laravel / PHP** and **Node.js** on the backend, and **React, Next.js, and Vue.js** on the frontend, alongside expert custom **WordPress** design and development. My work at Skywave Info Solutions revolves around developing performant client portals, custom WooCommerce themes, APIs, and cross-platform apps.
+              Hello! I'm Jackey, a passionate full-stack developer based in Ahmedabad, Gujarat. I specialize in building robust web applications and portals using <strong>Laravel / PHP</strong> and <strong>Node.js</strong> on the backend, and <strong>React, Next.js, and Vue.js</strong> on the frontend, alongside expert custom <strong>WordPress</strong> design and development. My work at Skywave Info Solutions revolves around developing performant client portals, custom WooCommerce themes, APIs, and cross-platform apps.
             </p>
             <p style="margin-top: 16px;">
               I enjoy bridging the gap between design and development — translating complex designs into clean, accessible, and responsive code. I'm always looking to learn new technologies and improve my engineering skills.
