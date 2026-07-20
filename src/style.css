@@ -450,8 +450,9 @@ nav a {
   font-weight: 500;
   font-size: 14px;
   position: relative;
-  padding: 4px 0;
-  transition: color 0.3s;
+  padding: 4px 8px;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: 8px;
 }
 
 nav a::after {
@@ -463,10 +464,13 @@ nav a::after {
   height: 2px;
   background: var(--gradient-primary);
   transition: width 0.3s ease, left 0.3s ease;
+  border-radius: 2px;
 }
 
 nav a:hover, nav a.active {
   color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.03);
+  transform: translateY(-2px);
 }
 
 nav a:hover::after, nav a.active::after {
@@ -993,7 +997,8 @@ section {
   color: var(--text-primary);
   border-color: var(--accent);
   background: var(--accent-glow);
-  transform: translateY(-2px);
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: 0 4px 15px rgba(168, 85, 247, 0.2);
 }
 
 .filter-btn.active {
@@ -1151,7 +1156,28 @@ section {
 .skill-item {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   font-size: 14px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid transparent;
+  background: transparent;
+}
+
+.skill-item:hover {
+  transform: translateX(8px);
+  background: var(--accent-glow);
+  border-color: rgba(168, 85, 247, 0.3);
+  box-shadow: 0 4px 15px rgba(168, 85, 247, 0.15);
+}
+
+.skill-item img {
+  transition: transform 0.4s ease;
+}
+
+.skill-item:hover img {
+  transform: scale(1.2) rotate(5deg);
 }
 
 .skill-name {
@@ -1209,7 +1235,8 @@ section {
 .form-input:focus, .form-textarea:focus {
   outline: none;
   border-color: var(--accent);
-  box-shadow: 0 0 0 2px var(--accent-glow);
+  box-shadow: 0 0 0 3px var(--accent-glow), 0 10px 20px rgba(0,0,0,0.1);
+  transform: translateY(-2px);
 }
 
 .form-textarea {
@@ -1237,6 +1264,19 @@ footer {
   align-items: center;
   color: var(--text-secondary);
   font-size: 13px;
+}
+
+footer a.project-link {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  padding: 6px 12px;
+  border-radius: 20px;
+}
+
+footer a.project-link:hover {
+  background: var(--accent-glow);
+  transform: translateY(-4px) scale(1.05);
+  color: var(--text-primary);
+  box-shadow: 0 5px 15px rgba(168, 85, 247, 0.2);
 }
 
 .about-stats-grid {

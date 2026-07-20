@@ -1,5 +1,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted, computed } from 'vue'
+import Header from './Header.vue'
+import { isDark, initTheme } from '../composables/useTheme'
 
 const projects = ref([
   {
@@ -39,8 +41,8 @@ const projects = ref([
   },
   {
     name: 'Myshop1 Mobile App',
-    desc: 'A mobile client for e-commerce stores built using Java and Android SDK, featuring smooth checkout and product search.',
-    tech: ['Java', 'Android SDK', 'REST APIs', 'SQLite'],
+    desc: 'A mobile client for e-commerce stores built using Android SDK, featuring smooth checkout and product search.',
+    tech: ['Android SDK', 'REST APIs', 'SQLite'],
     link: 'https://github.com/jackeybharthi/Myshop1',
     category: 'Mobile'
   }
@@ -67,6 +69,7 @@ const skills = ref([
     items: [
       { name: 'Laravel / PHP', level: 'Expert', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/laravel/laravel-original.svg' },
       { name: 'Node.js / Express', level: 'Advanced', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg' },
+      { name: 'C / C++', level: 'Advanced', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/cplusplus/cplusplus-original.svg' },
       { name: 'MySQL / PostgreSQL', level: 'Expert', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mysql/mysql-original.svg' },
       { name: 'Supabase', level: 'Advanced', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/supabase/supabase-original.svg' }
     ]
@@ -77,7 +80,7 @@ const skills = ref([
       { name: 'AWS Cloud', level: 'Advanced', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/amazonwebservices/amazonwebservices-original-wordmark.svg' },
       { name: 'n8n & AI Automation', level: 'Expert', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/bash/bash-original.svg' },
       { name: 'WordPress Development', level: 'Expert', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/wordpress/wordpress-plain.svg' },
-      { name: 'React Native / Java', level: 'Advanced', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg' }
+      { name: 'React Native', level: 'Advanced', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg' }
     ]
   }
 ])
@@ -125,24 +128,12 @@ const mouseY = ref(0)
 const cursorX = ref(-1000)
 const cursorY = ref(-1000)
 const particles = ref([])
-const isDark = ref(true)
 
 const handleMouseMove = (e) => {
   mouseX.value = (e.clientX / window.innerWidth - 0.5) * 35
   mouseY.value = (e.clientY / window.innerHeight - 0.5) * 35
   cursorX.value = e.clientX
   cursorY.value = e.clientY
-}
-
-const toggleTheme = () => {
-  isDark.value = !isDark.value
-  if (isDark.value) {
-    document.documentElement.classList.remove('light-theme')
-    localStorage.setItem('theme', 'dark')
-  } else {
-    document.documentElement.classList.add('light-theme')
-    localStorage.setItem('theme', 'light')
-  }
 }
 
 const terminalInput = ref('')
@@ -166,7 +157,7 @@ const handleTerminalCommand = () => {
       terminalLines.value.push({ text: 'I am a Full-Stack Software Developer specializing in building high-performance web applications using Laravel, React, Vue, Next.js, and WordPress. Based in Ahmedabad.', type: 'response' })
       break
     case 'skills':
-      terminalLines.value.push({ text: '=== Tech Stack ===\n* Laravel & PHP\n* AWS, Supabase, n8n AI Automation\n* React, Next.js, Vue\n* Node.js & REST APIs\n* MySQL, PostgreSQL, Android Java', type: 'response' })
+      terminalLines.value.push({ text: '=== Tech Stack ===\n* Laravel & PHP\n* AWS, Supabase, n8n AI Automation\n* React, Next.js, Vue\n* Node.js & C / C++\n* MySQL, PostgreSQL, React Native', type: 'response' })
       break
     case 'contact':
       terminalLines.value.push({ text: 'Email: jackey.bharthi@gmail.com\nWhatsApp: +91 82000 04544\nLocation: Ahmedabad, Gujarat, India\nLinkedIn: linkedin.com/in/jackeybharthi', type: 'response' })
@@ -185,7 +176,7 @@ const handleTerminalCommand = () => {
   }, 50)
 }
 
-const activeSection = ref('about')
+const activeSection = ref('')
 const typedText = ref('')
 const words = ['full-stack web applications', 'custom Laravel backends', 'bespoke WordPress themes', 'responsive user experiences']
 let wordIdx = 0
@@ -217,30 +208,22 @@ const typeEffect = () => {
 }
 
 const handleScroll = () => {
-  const sections = ['about', 'experience', 'projects', 'skills', 'contact']
+  const sections = ['projects', 'skills', 'contact']
   const scrollPosition = window.scrollY + 120
   
+  let currentSec = ''
   for (const sec of sections) {
     const el = document.getElementById(sec)
     if (el) {
       const top = el.offsetTop
       const height = el.offsetHeight
       if (scrollPosition >= top && scrollPosition < top + height) {
-        activeSection.value = sec
+        currentSec = sec
         break
       }
     }
   }
-}
-
-const scrollToSection = (id) => {
-  const el = document.getElementById(id)
-  if (el) {
-    window.scrollTo({
-      top: el.offsetTop,
-      behavior: 'smooth'
-    })
-  }
+  activeSection.value = currentSec
 }
 
 onMounted(() => {
@@ -263,10 +246,8 @@ onMounted(() => {
     })
   }
 
-  // Always default to dark theme on load
-  isDark.value = true
-  document.documentElement.classList.remove('light-theme')
-  localStorage.setItem('theme', 'dark')
+  // Always default to dark theme on load or use saved
+  initTheme()
 
   // Scroll Reveal Observer
   const revealObserver = new IntersectionObserver((entries) => {
@@ -339,36 +320,7 @@ onUnmounted(() => {
       ></div>
     </div>
   </div>
-  <header>
-    <a href="/" class="logo" style="display: flex; align-items: center; gap: 8px;">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="url(#logo-grad)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;">
-        <defs>
-          <linearGradient id="logo-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#a855f7" />
-            <stop offset="100%" stop-color="#6366f1" />
-          </linearGradient>
-        </defs>
-        <polyline points="16 18 22 12 16 6"></polyline>
-        <polyline points="8 6 2 12 8 18"></polyline>
-      </svg>
-      <span>Jackey Bharthi</span>
-    </a>
-    <nav>
-      <a href="javascript:void(0)" @click.prevent="scrollToSection('about')" :class="{ active: activeSection === 'about' }">About</a>
-      <a href="javascript:void(0)" @click.prevent="scrollToSection('experience')" :class="{ active: activeSection === 'experience' }">Experience</a>
-      <a href="javascript:void(0)" @click.prevent="scrollToSection('projects')" :class="{ active: activeSection === 'projects' }">Projects</a>
-      <a href="javascript:void(0)" @click.prevent="scrollToSection('skills')" :class="{ active: activeSection === 'skills' }">Skills</a>
-      <a href="javascript:void(0)" @click.prevent="scrollToSection('contact')" :class="{ active: activeSection === 'contact' }">Contact</a>
-      
-      <div class="theme-switch" @click="toggleTheme" role="button" aria-label="Toggle Dark Mode">
-        <div class="switch-track" :class="{ 'is-light': !isDark }">
-          <div class="switch-thumb"></div>
-          <i class="bi bi-moon-stars-fill icon-moon"></i>
-          <i class="bi bi-sun-fill icon-sun"></i>
-        </div>
-      </div>
-    </nav>
-  </header>
+  <Header :activeSection="activeSection" />
 
   <main>
     <section class="hero-section">
@@ -425,91 +377,7 @@ onUnmounted(() => {
       </div>
     </div>
 
-    <section id="about">
-      <h2 class="section-title">About Me</h2>
-      <div class="about-container">
-        <div class="about-left" style="display: flex; flex-direction: column; gap: 24px;">
-          <div class="about-text">
-            <p>
-              Hello! I'm Jackey, a passionate full-stack developer based in Ahmedabad, Gujarat. I specialize in building robust web applications and portals using <strong>Laravel / PHP</strong> and <strong>Node.js</strong> on the backend, and <strong>React, Next.js, and Vue.js</strong> on the frontend, alongside expert custom <strong>WordPress</strong> design and development. My work at <a href="https://www.skywaveinfosolutions.com/" target="_blank" style="color: var(--accent); text-decoration: none;">Skywave Info Solutions</a> revolves around developing performant client portals, custom WooCommerce themes, APIs, and cross-platform apps.
-            </p>
-            <p style="margin-top: 16px;">
-              I enjoy bridging the gap between design and development — translating complex designs into clean, accessible, and responsive code. I'm always looking to learn new technologies and improve my engineering skills.
-            </p>
-          </div>
-          <div class="about-stats-grid">
-            <div class="stat-card" style="padding: 12px;">
-              <span class="stat-num">4+</span>
-              <span class="stat-label">Years Experience</span>
-            </div>
-            <div class="stat-card" style="padding: 12px;">
-              <span class="stat-num">15+</span>
-              <span class="stat-label">Projects Completed</span>
-            </div>
-            <div class="stat-card" style="padding: 12px;">
-              <span class="stat-num">99%</span>
-              <span class="stat-label">Client Satisfaction</span>
-            </div>
-          </div>
-        </div>
-        <div class="about-right">
-          <div class="mock-editor">
-            <div class="editor-header">
-              <div class="dots">
-                <span class="dot red"></span>
-                <span class="dot yellow"></span>
-                <span class="dot green"></span>
-              </div>
-              <span class="file-name">PortfolioController.php</span>
-            </div>
-            <pre class="code-content" style="font-family: var(--mono); margin: 0; padding: 16px; overflow-x: auto; font-size: 12px; line-height: 1.5;"><code><span class="keyword">namespace</span> App\Http\Controllers;
 
-<span class="keyword">class</span> <span class="class-name">PortfolioController</span> {
-    <span class="keyword">public function</span> <span class="function-name">getSkills</span>() {
-        <span class="keyword">return</span> [
-            <span class="string">'frontend'</span> => [<span class="string">'React'</span>, <span class="string">'Vue.js'</span>, <span class="string">'Next.js'</span>],
-            <span class="keyword">'backend'</span>  => [<span class="string">'Laravel'</span>, <span class="string">'Node.js'</span>, <span class="string">'Supabase'</span>],
-            <span class="keyword">'cloud_ai'</span> => [<span class="string">'AWS'</span>, <span class="string">'n8n Automation'</span>],
-            <span class="string">'database'</span> => [<span class="string">'MySQL'</span>, <span class="string">'PostgreSQL'</span>]
-        ];
-    }
-}</code></pre>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section id="experience">
-      <h2 class="section-title">Work Experience</h2>
-      <div class="experience-timeline">
-        <div class="timeline-item">
-          <div class="timeline-dot"></div>
-          <div class="timeline-header">
-            <div>
-              <h3 class="role-title">Full-Stack Developer</h3>
-              <span class="company-name"><a href="https://www.skywaveinfosolutions.com/" target="_blank" style="color: inherit; text-decoration: none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Skywave Info Solutions Pvt. Ltd.</a></span>
-            </div>
-            <span class="role-duration">2022 - Present</span>
-          </div>
-          <p class="role-desc">
-            Develop responsive customer interfaces using React, Next.js, and Vue.js. Construct scalable backends, database models, and RESTful APIs using Laravel/PHP, MySQL, and Node.js. Build and deploy cross-platform mobile portals using React Native.
-          </p>
-        </div>
-        <div class="timeline-item">
-          <div class="timeline-dot"></div>
-          <div class="timeline-header">
-            <div>
-              <h3 class="role-title">Freelance Software Developer</h3>
-              <span class="company-name">Freelancer.com</span>
-            </div>
-            <span class="role-duration">2020 - 2022</span>
-          </div>
-          <p class="role-desc">
-            Created and hosted custom web applications and full-scale e-commerce digital storefronts using custom-coded WordPress themes and Laravel. Integrated payment processors, optimized site loading speeds, and managed server setups for overseas clients.
-          </p>
-        </div>
-      </div>
-    </section>
 
     <section id="projects">
       <h2 class="section-title">Selected Projects</h2>
