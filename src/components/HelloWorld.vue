@@ -233,6 +233,16 @@ const handleScroll = () => {
   }
 }
 
+const scrollToSection = (id) => {
+  const el = document.getElementById(id)
+  if (el) {
+    window.scrollTo({
+      top: el.offsetTop,
+      behavior: 'smooth'
+    })
+  }
+}
+
 onMounted(() => {
   window.addEventListener('mousemove', handleMouseMove)
   window.addEventListener('scroll', handleScroll)
@@ -330,7 +340,7 @@ onUnmounted(() => {
     </div>
   </div>
   <header>
-    <a href="#" class="logo" style="display: flex; align-items: center; gap: 8px;">
+    <a href="/" class="logo" style="display: flex; align-items: center; gap: 8px;">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="url(#logo-grad)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;">
         <defs>
           <linearGradient id="logo-grad" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -344,11 +354,11 @@ onUnmounted(() => {
       <span>Jackey Bharthi</span>
     </a>
     <nav>
-      <a href="#about" :class="{ active: activeSection === 'about' }">About</a>
-      <a href="#experience" :class="{ active: activeSection === 'experience' }">Experience</a>
-      <a href="#projects" :class="{ active: activeSection === 'projects' }">Projects</a>
-      <a href="#skills" :class="{ active: activeSection === 'skills' }">Skills</a>
-      <a href="#contact" :class="{ active: activeSection === 'contact' }">Contact</a>
+      <a href="javascript:void(0)" @click.prevent="scrollToSection('about')" :class="{ active: activeSection === 'about' }">About</a>
+      <a href="javascript:void(0)" @click.prevent="scrollToSection('experience')" :class="{ active: activeSection === 'experience' }">Experience</a>
+      <a href="javascript:void(0)" @click.prevent="scrollToSection('projects')" :class="{ active: activeSection === 'projects' }">Projects</a>
+      <a href="javascript:void(0)" @click.prevent="scrollToSection('skills')" :class="{ active: activeSection === 'skills' }">Skills</a>
+      <a href="javascript:void(0)" @click.prevent="scrollToSection('contact')" :class="{ active: activeSection === 'contact' }">Contact</a>
       
       <div class="theme-switch" @click="toggleTheme" role="button" aria-label="Toggle Dark Mode">
         <div class="switch-track" :class="{ 'is-light': !isDark }">
@@ -376,8 +386,8 @@ onUnmounted(() => {
           Focused on crafting premium user experiences that are fast, modern, and highly scalable.
         </p>
         <div class="cta-group">
-          <a href="#projects" class="btn btn-primary">Explore Work</a>
-          <a href="#contact" class="btn btn-secondary">Get in Touch</a>
+          <a href="javascript:void(0)" @click.prevent="scrollToSection('projects')" class="btn btn-primary">Explore Work</a>
+          <a href="javascript:void(0)" @click.prevent="scrollToSection('contact')" class="btn btn-secondary">Get in Touch</a>
         </div>
       </div>
       <div class="hero-image-wrapper">
