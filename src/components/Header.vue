@@ -1,5 +1,5 @@
 <script setup>
-import { defineProps } from 'vue'
+import { defineProps, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { isDark, toggleTheme } from '../composables/useTheme'
 
@@ -13,45 +13,52 @@ const props = defineProps({
 const router = useRouter()
 const route = useRoute()
 
-const navigateTo = (section) => {
+const navigateTo = async (section) => {
   if (section === 'about') {
-    if (route.path !== '/about') router.push('/about')
+    if (route.path !== '/about') {
+      await router.push('/about')
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' })
     return
   }
 
   if (section === 'experience') {
     if (route.path !== '/about') {
-      router.push('/about')
+      await router.push('/about')
+      await nextTick()
       setTimeout(() => {
         const el = document.getElementById('experience')
-        if (el) window.scrollTo({ top: el.offsetTop - 120, behavior: 'smooth' })
-      }, 150)
+        if (el) window.scrollTo({ top: el.offsetTop - 80, behavior: 'smooth' })
+      }, 50)
     } else {
       const el = document.getElementById('experience')
-      if (el) window.scrollTo({ top: el.offsetTop - 120, behavior: 'smooth' })
+      if (el) window.scrollTo({ top: el.offsetTop - 80, behavior: 'smooth' })
     }
     return
   }
 
   if (route.path !== '/') {
-    router.push('/')
+    await router.push('/')
+    await nextTick()
     setTimeout(() => {
       const el = document.getElementById(section)
       if (el) {
-        window.scrollTo({ top: el.offsetTop, behavior: 'smooth' })
+        window.scrollTo({ top: el.offsetTop - 80, behavior: 'smooth' })
       }
-    }, 150)
+    }, 50)
   } else {
     const el = document.getElementById(section)
     if (el) {
-      window.scrollTo({ top: el.offsetTop, behavior: 'smooth' })
+      window.scrollTo({ top: el.offsetTop - 80, behavior: 'smooth' })
     }
   }
 }
 
-const handleLogoClick = () => {
+const handleLogoClick = async () => {
   if (route.path === '/') {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  } else {
+    await router.push('/')
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 }

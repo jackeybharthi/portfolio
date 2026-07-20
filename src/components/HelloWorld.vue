@@ -166,7 +166,7 @@ const handleTerminalCommand = () => {
   
   switch(cmd) {
     case 'help':
-      terminalLines.value.push({ text: 'Available commands:\n  about     - Learn more about me\n  skills    - Print key skills\n  contact   - Get email, phone and socials info\n  clear     - Clear the terminal screen', type: 'response' })
+      terminalLines.value.push({ text: 'Available commands:\n  about     - Learn more about me\n  skills    - Print key skills\n  contact   - Get email, phone and socials info\n  matrix    - ???\n  clear     - Clear the terminal screen', type: 'response' })
       break
     case 'about':
       terminalLines.value.push({ text: 'I am a Full-Stack Software Developer specializing in building high-performance web applications using Laravel, React, Vue, Next.js, and WordPress. Based in Ahmedabad.', type: 'response' })
@@ -176,6 +176,26 @@ const handleTerminalCommand = () => {
       break
     case 'contact':
       terminalLines.value.push({ text: 'Email: jackey.bharthi@gmail.com\nWhatsApp: +91 82000 04544\nLocation: Ahmedabad, Gujarat, India\nLinkedIn: linkedin.com/in/jackeybharthi', type: 'response' })
+      break
+    case 'matrix':
+      triggerMatrixMode()
+      terminalLines.value.push({ text: 'Wake up, Neo...\nMatrix mode activated.', type: 'response', style: 'color: #0f0' })
+      break
+    case 'sudo rm -rf /':
+      terminalLines.value.push({ text: 'Executing... permissions bypassed.', type: 'error' })
+      setTimeout(() => {
+        document.body.innerHTML = '<div style="background: #ef4444; color: #fff; height: 100vh; width: 100vw; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: monospace; font-size: 24px; text-align: center; position: fixed; top: 0; left: 0; z-index: 999999;"><h1>FATAL ERROR</h1><p>KERNEL PANIC - CRITICAL SYSTEM FAILURE</p><p id="reboot-timer">Rebooting in 3...</p></div>'
+        let count = 3
+        const interval = setInterval(() => {
+          count--
+          const timer = document.getElementById('reboot-timer')
+          if (timer) timer.innerText = `Rebooting in ${count}...`
+          if (count <= 0) {
+            clearInterval(interval)
+            window.location.reload()
+          }
+        }, 1000)
+      }, 1500)
       break
     case 'clear':
       terminalLines.value = []
@@ -189,6 +209,56 @@ const handleTerminalCommand = () => {
     const body = document.querySelector('.terminal-body')
     if (body) body.scrollTop = body.scrollHeight
   }, 50)
+}
+
+const matrixInterval = ref(null)
+
+const triggerMatrixMode = () => {
+  let canvas = document.getElementById('matrix-canvas')
+  if (canvas) {
+    clearInterval(matrixInterval.value)
+    canvas.remove()
+    return // Toggle off if already exists
+  }
+
+  canvas = document.createElement('canvas')
+  canvas.id = 'matrix-canvas'
+  canvas.style.position = 'fixed'
+  canvas.style.top = '0'
+  canvas.style.left = '0'
+  canvas.style.width = '100vw'
+  canvas.style.height = '100vh'
+  canvas.style.zIndex = '9999'
+  canvas.style.pointerEvents = 'none'
+  canvas.style.opacity = '0.75'
+  document.body.appendChild(canvas)
+
+  const ctx = canvas.getContext('2d')
+  canvas.width = window.innerWidth
+  canvas.height = window.innerHeight
+
+  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()_+='
+  const fontSize = 16
+  const columns = canvas.width / fontSize
+  const drops = Array.from({ length: columns }).map(() => 1)
+
+  matrixInterval.value = setInterval(() => {
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.05)'
+    ctx.fillRect(0, 0, canvas.width, canvas.height)
+    
+    ctx.fillStyle = '#0F0'
+    ctx.font = fontSize + 'px monospace'
+
+    for (let i = 0; i < drops.length; i++) {
+      const text = letters[Math.floor(Math.random() * letters.length)]
+      ctx.fillText(text, i * fontSize, drops[i] * fontSize)
+
+      if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+        drops[i] = 0
+      }
+      drops[i]++
+    }
+  }, 33)
 }
 
 const activeSection = ref('')
@@ -222,7 +292,65 @@ const typeEffect = () => {
   setTimeout(typeEffect, speed)
 }
 
+const createClickSparks = (e) => {
+  // Don't spawn if clicking inside the terminal input to avoid distraction
+  if (e.target.tagName === 'INPUT') return;
+
+  const colors = ['#38bdf8', '#a855f7', '#6366f1', '#10b981'];
+  for (let i = 0; i < 12; i++) {
+    const spark = document.createElement('div');
+    spark.style.position = 'fixed';
+    spark.style.left = e.clientX + 'px';
+    spark.style.top = e.clientY + 'px';
+    spark.style.width = '6px';
+    spark.style.height = '6px';
+    spark.style.borderRadius = '50%';
+    spark.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+    spark.style.pointerEvents = 'none';
+    spark.style.zIndex = '99999';
+    spark.style.transition = 'transform 0.6s cubic-bezier(0.2, 1, 0.3, 1), opacity 0.6s ease';
+    spark.style.boxShadow = `0 0 10px ${spark.style.backgroundColor}`;
+    
+    document.body.appendChild(spark);
+
+    const angle = Math.random() * Math.PI * 2;
+    const velocity = 40 + Math.random() * 60;
+    const tx = Math.cos(angle) * velocity;
+    const ty = Math.sin(angle) * velocity;
+
+    // Trigger animation next frame
+    requestAnimationFrame(() => {
+      spark.style.transform = `translate(${tx}px, ${ty}px) scale(0)`;
+      spark.style.opacity = '0';
+    });
+
+    setTimeout(() => {
+      spark.remove();
+    }, 600);
+  }
+}
+
+let profileClickCount = 0;
+const handleProfileClick = (e) => {
+  profileClickCount++;
+  if (profileClickCount >= 3) {
+    e.target.style.transition = 'transform 4s cubic-bezier(0.2, 1, 0.3, 1)';
+    e.target.style.transform = `translate3d(${mouseX.value * 0.4}px, ${mouseY.value * 0.4}px, 0) rotate(1080deg) scale(1.2)`;
+    setTimeout(() => {
+      profileClickCount = 0;
+      e.target.style.transition = 'all 0.4s ease-out';
+      e.target.style.transform = `translate3d(${mouseX.value * 0.4}px, ${mouseY.value * 0.4}px, 0) rotate(0deg) scale(1)`;
+    }, 4000);
+  }
+}
+
+const scrollProgress = ref(0)
 const handleScroll = () => {
+  // Update scroll progress
+  const docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+  const scrollTop = window.scrollY;
+  scrollProgress.value = (scrollTop / docHeight) * 100;
+
   const sections = ['projects', 'skills', 'contact']
   const scrollPosition = window.scrollY + 120
   
@@ -241,12 +369,101 @@ const handleScroll = () => {
   activeSection.value = currentSec
 }
 
+const handleCardTilt = (e, index) => {
+  const card = document.getElementById(`project-card-${index}`);
+  if (!card) return;
+  const rect = card.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+  
+  const centerX = rect.width / 2;
+  const centerY = rect.height / 2;
+  
+  const rotateX = ((y - centerY) / centerY) * -12;
+  const rotateY = ((x - centerX) / centerX) * 12;
+  
+  card.style.transform = `perspective(1000px) scale3d(1.03, 1.03, 1.03) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+  card.style.transition = 'none';
+  card.style.zIndex = '10';
+  card.style.boxShadow = `0 20px 40px rgba(168, 85, 247, 0.2)`;
+  card.style.setProperty('--mouse-x', `${x}px`);
+  card.style.setProperty('--mouse-y', `${y}px`);
+};
+
+const resetCardTilt = (index) => {
+  const card = document.getElementById(`project-card-${index}`);
+  if (!card) return;
+  card.style.transform = '';
+  card.style.transition = 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)';
+  card.style.zIndex = '1';
+  card.style.boxShadow = '';
+};
+
+const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+let konamiIndex = 0;
+
+const handleKeydown = (e) => {
+  if (e.key === konamiCode[konamiIndex]) {
+    konamiIndex++;
+    if (konamiIndex === konamiCode.length) {
+      document.body.classList.toggle('retro-crt-mode');
+      const terminalBody = document.querySelector('.terminal-body');
+      if (terminalBody) {
+        terminalLines.value.push({ text: 'KONAMI CODE ACCEPTED. Retro CRT Mode activated.', type: 'response', style: 'color: #ff00ff; font-weight: bold;' });
+        setTimeout(() => terminalBody.scrollTop = terminalBody.scrollHeight, 50);
+      }
+      konamiIndex = 0;
+    }
+  } else {
+    konamiIndex = 0;
+  }
+};
+
+const scrambleText = (el) => {
+  const originalText = el.dataset.text || el.innerText;
+  if (!el.dataset.text) el.dataset.text = originalText;
+  
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+';
+  let iterations = 0;
+  
+  const interval = setInterval(() => {
+    el.innerText = originalText.split('').map((letter, index) => {
+      if(index < iterations) return originalText[index];
+      return chars[Math.floor(Math.random() * chars.length)];
+    }).join('');
+    
+    if(iterations >= originalText.length) clearInterval(interval);
+    iterations += 1/3; // Speed of decoding
+  }, 30);
+}
+
 onMounted(() => {
   window.addEventListener('mousemove', handleMouseMove)
+  window.addEventListener('click', createClickSparks)
   window.addEventListener('scroll', handleScroll)
+  window.addEventListener('keydown', handleKeydown)
   
   // Launch typing effect
   typeEffect()
+  
+  // Initial active section calculation
+  handleScroll()
+
+  // Intersection Observer for fade-in animations and text scramble
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible')
+        
+        // Trigger text scramble for section titles
+        const title = entry.target.querySelector('.section-title')
+        if (title && !title.classList.contains('scrambled')) {
+          title.classList.add('scrambled');
+          scrambleText(title);
+        }
+      }
+    })
+  }, { threshold: 0.08 })
   
   // Initialize particles
   for (let i = 0; i < 20; i++) {
@@ -264,14 +481,6 @@ onMounted(() => {
   // Always default to dark theme on load or use saved
   initTheme()
 
-  // Scroll Reveal Observer
-  const revealObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('visible')
-      }
-    })
-  }, { threshold: 0.08 })
   
   document.querySelectorAll('section').forEach(section => {
     section.classList.add('reveal')
@@ -281,11 +490,24 @@ onMounted(() => {
 
 onUnmounted(() => {
   window.removeEventListener('mousemove', handleMouseMove)
+  window.removeEventListener('click', createClickSparks)
   window.removeEventListener('scroll', handleScroll)
+  window.removeEventListener('keydown', handleKeydown)
 })
+
+const previewProject = ref(null)
+const openPreview = (project) => {
+  previewProject.value = project
+  document.body.style.overflow = 'hidden'
+}
+const closePreview = () => {
+  previewProject.value = null
+  document.body.style.overflow = ''
+}
 </script>
 
 <template>
+  <div id="scroll-progress" :style="{ width: scrollProgress + '%' }"></div>
   <div class="bg-grid-lines">
     <div class="grid-line"></div>
     <div class="grid-line"></div>
@@ -345,8 +567,8 @@ onUnmounted(() => {
           Available for Web Dev roles
         </div>
         <h1 class="hero-title">
-          Building high-performance,<br>
-          <span style="display: inline-block; min-height: 48px; background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">{{ typedText }}<span class="typed-cursor" style="color: var(--accent); margin-left: 4px; font-weight: 300;">|</span></span>
+          <span class="glitch-text" data-text="Building high-performance,">Building high-performance,</span><br>
+          <span class="animated-gradient-text">{{ typedText }}<span class="typed-cursor" style="color: var(--accent); margin-left: 4px; font-weight: 300;">|</span></span>
         </h1>
         <p class="hero-desc">
           I am a Full-Stack Developer at <a href="https://www.skywaveinfosolutions.com/" target="_blank" style="color: var(--accent); text-decoration: none;">Skywave Info Solutions</a> specializing in Laravel, WordPress, React, Next.js, and Node.js. 
@@ -359,7 +581,7 @@ onUnmounted(() => {
       </div>
       <div class="hero-image-wrapper">
         <div class="hero-orb" :style="{ transform: 'translate3d(' + (mouseX * -0.8) + 'px, ' + (mouseY * -0.8) + 'px, 0)' }"></div>
-        <img src="/profile.jpg" alt="Jackey Bharthi" class="profile-photo" :style="{ transform: 'translate3d(' + (mouseX * 0.4) + 'px, ' + (mouseY * 0.4) + 'px, 0)' }" />
+        <img src="/profile.jpg" alt="Jackey Bharthi" class="profile-photo" :style="{ transform: 'translate3d(' + (mouseX * 0.4) + 'px, ' + (mouseY * 0.4) + 'px, 0)' }" @click="handleProfileClick" />
       </div>
     </section>
 
@@ -409,20 +631,21 @@ onUnmounted(() => {
       </div>
 
       <div class="projects-grid">
-        <div v-for="project in filteredProjects" :key="project.name" class="project-card">
+        <div v-for="(project, index) in filteredProjects" :key="project.name" class="project-card" :id="'project-card-' + index" @mousemove="(e) => handleCardTilt(e, index)" @mouseleave="resetCardTilt(index)" :style="{ '--stagger-idx': index }">
           <div class="project-tech">
             <span v-for="tech in project.tech" :key="tech" class="tech-tag" :style="{ color: getTechTagStyle(tech).color, background: getTechTagStyle(tech).bg }">{{ tech }}</span>
           </div>
           <h3 class="project-name">{{ project.name }}</h3>
           <p class="project-desc">{{ project.desc }}</p>
-          <a :href="project.link" target="_blank" class="project-link">
-            View Repository
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-              <polyline points="15 3 21 3 21 9"></polyline>
-              <line x1="10" y1="14" x2="21" y2="3"></line>
-            </svg>
-          </a>
+          <div class="project-actions">
+            <button @click="openPreview(project)" class="btn-preview">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+              Quick View
+            </button>
+          </div>
         </div>
       </div>
     </section>
@@ -433,7 +656,7 @@ onUnmounted(() => {
         <div v-for="cat in skills" :key="cat.category" class="skills-category">
           <h3>{{ cat.category }}</h3>
           <div class="skills-list">
-            <div v-for="skill in cat.items" :key="skill.name" class="skill-item" style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+            <div v-for="(skill, index) in cat.items" :key="skill.name" class="skill-item" :style="{ '--stagger-idx': index, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }">
               <div style="display: flex; align-items: center; gap: 10px;">
                 <img :src="skill.icon" alt="" style="width: 20px; height: 20px; object-fit: contain;" />
                 <span class="skill-name">{{ skill.name }}</span>
@@ -484,6 +707,7 @@ onUnmounted(() => {
             <div v-for="(line, idx) in terminalLines" :key="idx" class="terminal-line" :style="{ color: line.type === 'error' ? '#ef4444' : (line.type === 'input' ? 'var(--accent)' : 'inherit') }">
               {{ line.text }}
             </div>
+
             <form @submit.prevent="handleTerminalCommand" class="terminal-input-line">
               <span class="terminal-prompt">visitor@jackeybharthi:~$</span>
               <input type="text" v-model="terminalInput" class="terminal-input" placeholder="Type a command..." />
@@ -546,4 +770,26 @@ onUnmounted(() => {
       </router-link>
     </div>
   </footer>
+
+  <!-- Project Preview Modal -->
+  <Teleport to="body">
+    <Transition name="fade">
+      <div v-if="previewProject" class="preview-overlay" @click="closePreview">
+        <div class="preview-modal" @click.stop>
+          <div class="preview-header">
+            <h3>{{ previewProject.name }}</h3>
+            <div class="preview-actions">
+              <button @click="closePreview" class="btn-close" title="Close preview">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              </button>
+            </div>
+          </div>
+          <div class="preview-content">
+            <div class="preview-loader"></div>
+            <iframe :src="previewProject.link" title="Project Preview" loading="lazy" sandbox="allow-same-origin allow-scripts allow-popups allow-forms"></iframe>
+          </div>
+        </div>
+      </div>
+    </Transition>
+  </Teleport>
 </template>
