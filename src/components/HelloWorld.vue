@@ -2,6 +2,7 @@
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 import Header from './Header.vue'
 import { isDark, initTheme } from '../composables/useTheme'
+import { supabase } from '../supabase'
 
 const projects = ref([
   {
@@ -108,11 +109,20 @@ const getTechTagStyle = (tech) => {
   return colors[key] || { color: 'var(--accent)', bg: 'var(--accent-glow)' }
 }
 
-const handleSend = () => {
+const handleSend = async () => {
   if (name.value && email.value && message.value) {
     submitting.value = true
-    setTimeout(() => {
-      submitting.value = false
+    try {
+      const { error } = await supabase
+        .from('messages')
+        .insert([{
+          name: name.value,
+          email: email.value,
+          message: message.value
+        }])
+        
+      if (error) throw error
+
       formSubmitted.value = true
       name.value = ''
       email.value = ''
@@ -120,7 +130,12 @@ const handleSend = () => {
       setTimeout(() => {
         formSubmitted.value = false
       }, 5000)
-    }, 1200)
+    } catch (error) {
+      console.error('Error submitting form:', error)
+      alert('Failed to send message. Please try again or use direct email.')
+    } finally {
+      submitting.value = false
+    }
   }
 }
 const mouseX = ref(0)
@@ -524,6 +539,11 @@ onUnmounted(() => {
         <i class="bi bi-snapchat"></i> Snapchat
       </a>
     </div>
-    <div style="color: var(--text-secondary); font-size: 13px; margin-top: 8px;">© 2026 Jackey Bharthi. All rights reserved.</div>
+    <div style="color: var(--text-secondary); font-size: 13px; margin-top: 8px; display: flex; align-items: center; gap: 8px;">
+      <span>© 2026 Jackey Bharthi. All rights reserved.</span>
+      <router-link to="/admin" style="color: var(--text-secondary); opacity: 0.5; transition: opacity 0.2s;" title="Admin Dashboard">
+        <i class="bi bi-lock-fill" style="font-size: 12px;"></i>
+      </router-link>
+    </div>
   </footer>
 </template>

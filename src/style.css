@@ -409,6 +409,12 @@ body {
   padding: 80px 24px 0 24px; /* Added top padding to avoid header overlap */
 }
 
+@media (max-width: 768px) {
+  #app {
+    padding-bottom: 80px; /* Space for mobile bottom nav */
+  }
+}
+
 /* Header & Nav */
 header {
   position: fixed;

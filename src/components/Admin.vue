@@ -19,18 +19,22 @@ const checkPassword = () => {
   }
 }
 
+const activeTab = ref('analytics')
+const messagesData = ref([])
+
 const loadData = async () => {
   isLoading.value = true
   try {
-    const { data, error } = await supabase
-      .from('visitors')
-      .select('*')
-      .order('created_at', { ascending: false })
-      
-    if (error) throw error
-    if (data) {
-      visitorData.value = data
-    }
+    const [visitorsResponse, messagesResponse] = await Promise.all([
+      supabase.from('visitors').select('*').order('created_at', { ascending: false }),
+      supabase.from('messages').select('*').order('created_at', { ascending: false })
+    ])
+    
+    if (visitorsResponse.error) throw visitorsResponse.error
+    if (messagesResponse.error) throw messagesResponse.error
+    
+    if (visitorsResponse.data) visitorData.value = visitorsResponse.data
+    if (messagesResponse.data) messagesData.value = messagesResponse.data
   } catch (err) {
     console.error("Error loading Supabase data:", err)
     errorMsg.value = "Failed to load database. Check console."
@@ -42,12 +46,10 @@ const loadData = async () => {
 const filteredVisitors = computed(() => {
   let result = visitorData.value
   
-  // 1. Apply Device Filter
   if (deviceFilter.value !== 'All') {
     result = result.filter(v => v.device_type && v.device_type.includes(deviceFilter.value))
   }
   
-  // 2. Apply Text Search
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase()
     result = result.filter(visitor => {
@@ -63,6 +65,21 @@ const filteredVisitors = computed(() => {
   return result
 })
 
+const filteredMessages = computed(() => {
+  let result = messagesData.value
+  if (searchQuery.value) {
+    const query = searchQuery.value.toLowerCase()
+    result = result.filter(msg => {
+      return (
+        (msg.name && msg.name.toLowerCase().includes(query)) ||
+        (msg.email && msg.email.toLowerCase().includes(query)) ||
+        (msg.message && msg.message.toLowerCase().includes(query))
+      )
+    })
+  }
+  return result
+})
+
 const formatDate = (isoString) => {
   const date = new Date(isoString)
   return new Intl.DateTimeFormat('en-US', {
@@ -72,7 +89,6 @@ const formatDate = (isoString) => {
 
 const last7DaysStats = computed(() => {
   const stats = []
-  // Get last 7 days
   for (let i = 6; i >= 0; i--) {
     const d = new Date()
     d.setDate(d.getDate() - i)
@@ -84,7 +100,6 @@ const last7DaysStats = computed(() => {
     })
   }
   
-  // Count visitors per day
   visitorData.value.forEach(v => {
     if (!v.created_at) return
     const vDate = v.created_at.split('T')[0]
@@ -94,16 +109,14 @@ const last7DaysStats = computed(() => {
     }
   })
   
-  // Calculate heights relative to the max day
-  const max = Math.max(...stats.map(s => s.count), 5) // Minimum scale of 5
+  const max = Math.max(...stats.map(s => s.count), 5)
   
   return stats.map(s => ({
     ...s,
-    height: `${Math.max((s.count / max) * 100, 5)}%` // minimum 5% height just to show a tiny bar
+    height: `${Math.max((s.count / max) * 100, 5)}%`
   }))
 })
 
-// Quick Summary Stats
 const totalVisitors = computed(() => visitorData.value.length)
 
 const visitorsLast30Days = computed(() => {
@@ -163,16 +176,30 @@ const visitorsToday = computed(() => {
 
       <!-- Dashboard -->
       <div v-else class="dashboard-container">
+        
+        <!-- Tab Navigation -->
+        <div class="admin-tabs">
+          <button :class="['tab-btn', activeTab === 'analytics' ? 'active' : '']" @click="activeTab = 'analytics'">
+            <i class="bi bi-bar-chart-fill"></i> Visitor Analytics
+          </button>
+          <button :class="['tab-btn', activeTab === 'inbox' ? 'active' : '']" @click="activeTab = 'inbox'">
+            <i class="bi bi-envelope-paper-fill"></i> Inbox
+            <span v-if="messagesData.length" class="badge-count">{{ messagesData.length }}</span>
+          </button>
+        </div>
+
         <div class="dashboard-header">
           <div>
             <h2 class="hero-title" style="font-size: 36px; margin-bottom: 8px;">
-              <span>Visitor Analytics</span>
+              <span v-if="activeTab === 'analytics'">Visitor Analytics</span>
+              <span v-else>Inbox</span>
             </h2>
-            <p class="role-desc">Live global session tracking</p>
+            <p class="role-desc" v-if="activeTab === 'analytics'">Live global session tracking</p>
+            <p class="role-desc" v-else>Contact form submissions</p>
           </div>
           
           <div class="search-wrapper" style="display: flex; gap: 12px; align-items: center;">
-            <div class="filter-chips">
+            <div class="filter-chips" v-if="activeTab === 'analytics'">
               <button 
                 :class="['filter-chip', deviceFilter === 'All' ? 'active' : '']" 
                 @click="deviceFilter = 'All'">All</button>
@@ -186,102 +213,137 @@ const visitorsToday = computed(() => {
             <input 
               type="text" 
               v-model="searchQuery" 
-              placeholder="Search IP, City..." 
+              :placeholder="activeTab === 'analytics' ? 'Search IP, City...' : 'Search Name, Email...'" 
               class="admin-input search-input"
               style="width: 250px;"
             />
           </div>
         </div>
 
-        <!-- Quick Summary Stats (Ultra Compact) -->
-        <div class="summary-stats-row">
-          <div class="summary-chip">
-            <span class="chip-label">Today:</span>
-            <span class="chip-value">{{ visitorsToday }}</span>
-          </div>
-          <div class="summary-chip">
-            <span class="chip-label">Last 30 Days:</span>
-            <span class="chip-value">{{ visitorsLast30Days }}</span>
-          </div>
-          <div class="summary-chip">
-            <span class="chip-label">Total:</span>
-            <span class="chip-value">{{ totalVisitors }}</span>
-          </div>
-        </div>
-        
-        <!-- Visitor Graph Section -->
-        <div class="stat-card graph-card">
-          <h3 class="section-title" style="font-size: 18px; margin-bottom: 20px;">Last 7 Days Visitors</h3>
-          <div class="bar-chart">
-            <div class="bar-column" v-for="stat in last7DaysStats" :key="stat.date">
-              <span class="bar-count">{{ stat.count }}</span>
-              <div class="bar-track">
-                <div class="bar-fill" :style="{ height: stat.height }"></div>
-              </div>
-              <span class="bar-label">{{ stat.displayDate }}</span>
+        <!-- ANALYTICS TAB CONTENT -->
+        <div v-if="activeTab === 'analytics'" class="tab-content">
+          <!-- Quick Summary Stats -->
+          <div class="summary-stats-row">
+            <div class="summary-chip">
+              <span class="chip-label">Today:</span>
+              <span class="chip-value">{{ visitorsToday }}</span>
             </div>
-          </div>
-        </div>
-        
-        <div class="mock-terminal table-wrapper">
-          <div class="terminal-header">
-            <div class="dots">
-              <div class="dot red"></div>
-              <div class="dot yellow"></div>
-              <div class="dot green"></div>
+            <div class="summary-chip">
+              <span class="chip-label">Last 30 Days:</span>
+              <span class="chip-value">{{ visitorsLast30Days }}</span>
             </div>
-            <span class="file-name">visitor_data.json</span>
+            <div class="summary-chip">
+              <span class="chip-label">Total:</span>
+              <span class="chip-value">{{ totalVisitors }}</span>
+            </div>
           </div>
           
-          <div class="table-scroll-container">
-            <table class="glass-table">
-              <thead>
-                <tr>
-                  <th>Timestamp</th>
-                  <th>Visitor ID</th>
-                  <th>IPv4 Address</th>
-                  <th>Location</th>
-                  <th>Device</th>
+          <!-- Visitor Graph Section -->
+          <div class="stat-card graph-card">
+            <h3 class="section-title" style="font-size: 18px; margin-bottom: 20px;">Last 7 Days Visitors</h3>
+            <div class="bar-chart">
+              <div class="bar-column" v-for="stat in last7DaysStats" :key="stat.date">
+                <span class="bar-count">{{ stat.count }}</span>
+                <div class="bar-track">
+                  <div class="bar-fill" :style="{ height: stat.height }"></div>
+                </div>
+                <span class="bar-label">{{ stat.displayDate }}</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="mock-terminal table-wrapper">
+            <div class="terminal-header">
+              <div class="dots">
+                <div class="dot red"></div>
+                <div class="dot yellow"></div>
+                <div class="dot green"></div>
+              </div>
+              <span class="file-name">visitor_data.json</span>
+            </div>
+            
+            <div class="table-scroll-container">
+              <table class="glass-table">
+                <thead>
+                  <tr>
+                    <th>Timestamp</th>
+                    <th>Visitor ID</th>
+                    <th>IPv4 Address</th>
+                    <th>Location</th>
+                    <th>Device</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(visitor, index) in filteredVisitors" :key="visitor.visitor_id || index">
+                  <td>
+                    <span class="badge time-badge">{{ formatDate(visitor.created_at) }}</span>
+                  </td>
+                  <td class="mono-text">{{ visitor.visitor_id ? visitor.visitor_id.split('_')[1] : 'unknown' }}</td>
+                  <td class="mono-text highlight">{{ visitor.ip }}</td>
+                  <td>
+                    <div class="location-col">
+                      <span class="city">{{ visitor.city || 'Unknown' }}</span>
+                      <span class="country">{{ visitor.country }}</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span :class="['badge', visitor.device_type === 'Desktop' ? 'badge-desktop' : 'badge-mobile']">
+                      <div :class="['badge-dot', visitor.device_type === 'Desktop' ? 'dot-desktop' : 'dot-mobile']"></div>
+                      {{ visitor.device_type }}
+                    </span>
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                <tr v-for="(visitor, index) in filteredVisitors" :key="visitor.visitor_id || index">
-                <td>
-                  <span class="badge time-badge">{{ formatDate(visitor.created_at) }}</span>
-                </td>
-                <td class="mono-text">{{ visitor.visitor_id ? visitor.visitor_id.split('_')[1] : 'unknown' }}</td>
-                <td class="mono-text highlight">{{ visitor.ip }}</td>
-                <td>
-                  <div class="location-col">
-                    <span class="city">{{ visitor.city || 'Unknown' }}</span>
-                    <span class="country">{{ visitor.country }}</span>
-                  </div>
-                </td>
-                <td>
-                  <span :class="['badge', visitor.device_type === 'Desktop' ? 'badge-desktop' : 'badge-mobile']">
-                    <div :class="['badge-dot', visitor.device_type === 'Desktop' ? 'dot-desktop' : 'dot-mobile']"></div>
-                    {{ visitor.device_type }}
-                  </span>
-                </td>
-              </tr>
-              <tr v-if="isLoading">
-                <td colspan="5" class="empty-state">
-                  <p class="role-desc">Loading data from Supabase...</p>
-                </td>
-              </tr>
-              <tr v-else-if="filteredVisitors.length === 0">
-                <td colspan="5" class="empty-state">
-                  <p class="role-desc">No visitor records found.</p>
-                </td>
-              </tr>
-              </tbody>
-            </table>
+                <tr v-if="isLoading">
+                  <td colspan="5" class="empty-state">
+                    <p class="role-desc">Loading data from Supabase...</p>
+                  </td>
+                </tr>
+                <tr v-else-if="filteredVisitors.length === 0">
+                  <td colspan="5" class="empty-state">
+                    <p class="role-desc">No visitor records found.</p>
+                  </td>
+                </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <p class="role-desc" style="text-align: right; margin-top: 20px;">
+            Showing {{ filteredVisitors.length }} total records
+          </p>
+        </div>
+
+        <!-- INBOX TAB CONTENT -->
+        <div v-if="activeTab === 'inbox'" class="tab-content inbox-grid">
+          <div v-if="isLoading" class="empty-state">
+            <p class="role-desc">Loading messages...</p>
+          </div>
+          <div v-else-if="filteredMessages.length === 0" class="empty-state" style="grid-column: 1/-1;">
+            <i class="bi bi-envelope-x" style="font-size: 48px; color: var(--text-secondary); margin-bottom: 16px; display: block;"></i>
+            <h3 class="section-title">Inbox Zero</h3>
+            <p class="role-desc">No messages found matching your criteria.</p>
+          </div>
+          <div v-else v-for="msg in filteredMessages" :key="msg.id" class="stat-card message-card">
+            <div class="msg-header">
+              <div style="display: flex; gap: 12px; align-items: center;">
+                <div class="avatar-placeholder">{{ msg.name ? msg.name.charAt(0).toUpperCase() : '?' }}</div>
+                <div>
+                  <h4 class="msg-name">{{ msg.name }}</h4>
+                  <a :href="'mailto:' + msg.email" class="msg-email">{{ msg.email }}</a>
+                </div>
+              </div>
+              <span class="time-badge">{{ formatDate(msg.created_at) }}</span>
+            </div>
+            <div class="msg-body">
+              <p>{{ msg.message }}</p>
+            </div>
+            <div class="msg-footer">
+              <a :href="'mailto:' + msg.email" class="btn btn-primary btn-reply">
+                <i class="bi bi-reply-fill"></i> Reply
+              </a>
+            </div>
           </div>
         </div>
-        
-        <p class="role-desc" style="text-align: right; margin-top: 20px;">
-          Showing {{ filteredVisitors.length }} total records
-        </p>
+
       </div>
     </div>
   </div>
@@ -303,18 +365,21 @@ const visitorsToday = computed(() => {
 
 /* Custom Admin Header */
 .admin-header {
-  position: sticky;
-  top: 0;
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px 40px;
-  background: rgba(9, 9, 11, 0.8);
-  backdrop-filter: blur(16px);
-  border-bottom: 1px solid var(--border);
-  z-index: 10;
-  box-sizing: border-box;
+  position: sticky !important;
+  top: 0 !important;
+  left: 0 !important;
+  transform: none !important;
+  max-width: none !important;
+  width: 100% !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding: 20px 40px !important;
+  background: rgba(9, 9, 11, 0.8) !important;
+  backdrop-filter: blur(16px) !important;
+  border-bottom: 1px solid var(--border) !important;
+  z-index: 10 !important;
+  box-sizing: border-box !important;
 }
 
 .back-link {
@@ -662,5 +727,125 @@ const visitorsToday = computed(() => {
 .empty-state {
   text-align: center;
   padding: 80px !important;
+}
+
+/* Tabs */
+.admin-tabs {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 32px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 16px;
+}
+
+.tab-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-family: var(--font-heading);
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 8px 16px;
+  border-radius: 8px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tab-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+}
+
+.tab-btn.active {
+  background: var(--accent-glow);
+  color: var(--accent);
+  box-shadow: 0 0 15px rgba(168, 85, 247, 0.1);
+}
+
+.badge-count {
+  background: var(--accent);
+  color: #fff;
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  margin-left: 8px;
+}
+
+/* Inbox Tab Styles */
+.inbox-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  gap: 24px;
+}
+
+.message-card {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  text-align: left;
+}
+
+.msg-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 16px;
+}
+
+.avatar-placeholder {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--gradient-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.msg-name {
+  margin: 0 0 4px 0;
+  font-size: 18px;
+  color: var(--text-primary);
+}
+
+.msg-email {
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.msg-email:hover {
+  text-decoration: underline;
+}
+
+.msg-body {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  white-space: pre-wrap;
+  flex-grow: 1;
+}
+
+.msg-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.btn-reply {
+  padding: 8px 16px;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 </style>

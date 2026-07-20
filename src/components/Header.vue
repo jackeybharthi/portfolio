@@ -146,7 +146,7 @@ const handleLogoClick = () => {
 
 @media (max-width: 768px) {
   header {
-    padding: 12px 16px !important;
+    padding: 12px 20px !important;
   }
   
   .logo-text {
@@ -164,11 +164,31 @@ const handleLogoClick = () => {
   
   .mobile-icon {
     display: block;
+    font-size: 20px;
+  }
+  
+  /* Mobile Bottom Navigation Bar */
+  nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(9, 9, 11, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border);
+    padding: 12px 24px !important;
+    justify-content: space-between;
+    gap: 0 !important;
+    border-radius: 20px 20px 0 0;
+    box-shadow: 0 -10px 40px rgba(0,0,0,0.1);
+    z-index: 1000;
   }
   
   .nav-link {
     padding: 8px !important;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     border-radius: 12px;
@@ -176,17 +196,27 @@ const handleLogoClick = () => {
 
   .nav-link.active .mobile-icon {
     color: var(--accent);
-    transform: scale(1.1);
-    transition: all 0.3s ease;
+    transform: translateY(-4px) scale(1.1);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   }
 
   .about-pill {
-    padding: 4px !important;
+    padding: 0 !important;
+    border: none !important;
+    background: transparent !important;
     border-radius: 50% !important;
   }
-  
-  nav {
-    gap: 12px !important;
+
+  .about-pill .header-avatar {
+    width: 32px;
+    height: 32px;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+  }
+
+  .about-pill.active .header-avatar {
+    border-color: var(--accent);
+    transform: translateY(-4px);
   }
 }
 </style>
